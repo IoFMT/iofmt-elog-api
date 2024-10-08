@@ -27,7 +27,7 @@ from libs import config
 from libs.utils import decode, encode
 
 
-app = FastAPI()
+app = FastAPI(title="IoFMT ELog Wrapper REST API", version="0.1.0")
 security = HTTPBasic()
 templates = Jinja2Templates(directory="static")
 
