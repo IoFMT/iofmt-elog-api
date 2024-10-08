@@ -1,0 +1,14 @@
+fastapi
+pydantic
+python-dotenv
+uvicorn
+gunicorn
+python-multipart
+pytest
+pytest-mock
+pytest-cov
+typer
+psycopg2-binary
+sqlalchemy
+requests
+jinja2
