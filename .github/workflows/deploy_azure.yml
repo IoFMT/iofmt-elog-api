@@ -28,7 +28,7 @@ jobs:
         username: ${{ secrets.REGISTRY_USERNAME }}
         password: ${{ secrets.REGISTRY_PASSWORD }}
     - run: |
-        docker build . -t ${{ secrets.REGISTRY_URL }}/${{ secrets.WEBAPI }}:${{ github.sha }}
+        docker build . -t ${{ secrets.REGISTRY_URL }}/${{ secrets.WEBAPI2 }}:${{ github.sha }}
         docker push ${{ secrets.REGISTRY_URL }}/${{ secrets.WEBAPI2 }}:${{ github.sha }}     
       
     - uses: azure/webapps-deploy@v2

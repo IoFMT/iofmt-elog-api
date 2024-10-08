@@ -37,11 +37,11 @@ az role assignment create --role contributor --subscription <subscriptionId> --a
 
 d) Create a new federated identity credential
 
-First you need to creata a credential.json file
+First you need to create a credential.json file
 
 ```json
 {
-  "name": "iofmt-elog-api-cr",
+  "name": "iofmtelogapi-cr",
   "issuer": "https://token.actions.githubusercontent.com",
   "subject": "repo:IoFMT/iofmt-elog-api:ref:refs/heads/main",
   "description": "Testing",
@@ -54,7 +54,7 @@ First you need to creata a credential.json file
 Then execute the command:
 
 ```bash
-az ad app federated-credential create --id <subscriptionId> --parameters credential.json  
+az ad app federated-credential create --id <appId> --parameters credential.json  
 ```
 
 ### 2) Configure GitHub Secrets
