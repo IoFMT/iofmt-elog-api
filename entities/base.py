@@ -23,6 +23,13 @@ class Config(BaseModel):
         title="User Password",
         description="The user password of the ELog api user",
     )
+    url: str = Field(
+        title="URL",
+        description="The url of the ELog api user",
+    )
     token: str | None = Field(
         None, title="Token", description="The login token of the ELog api user"
+    )
+    expiration: int | None = Field(
+        None, title="Expiration", description="The date to token expire"
     )

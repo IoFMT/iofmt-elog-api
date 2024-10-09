@@ -21,7 +21,7 @@ from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.templating import Jinja2Templates
 
 from entities.base import Result
-from routers import config_router
+from routers import config_router, login_router
 
 from libs import config
 from libs.utils import decode, encode
@@ -35,6 +35,7 @@ templates = Jinja2Templates(directory="static")
 # Adding Routers
 # -------------------------------------------------
 app.include_router(config_router.router)
+app.include_router(login_router.router)
 
 
 # -------------------------------------------------

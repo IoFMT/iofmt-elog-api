@@ -38,7 +38,7 @@ if "CACHE_DB_PWD" in os.environ:
 # CACHE_DB = "data/cache.db"
 CACHE_DB = f"postgresql://{CACHE_DB_USER}:{CACHE_DB_PWD}@{CACHE_DB_HOST}/postgres"
 
-CACHE_SQL_INSERT_CONFIG = """INSERT INTO elogapi.config (api_key, user_name, user_pwd) VALUES (:p1, :p2, :p3)"""
+CACHE_SQL_INSERT_CONFIG = """INSERT INTO elogapi.config (api_key, user_name, user_pwd, url) VALUES (:p1, :p2, :p3, :p4)"""
 
 CACHE_SQL_DELETE_CONFIG = """DELETE FROM elogapi.config WHERE api_key = :p1"""
 
@@ -64,5 +64,13 @@ tags_metadata = [
     {
         "name": "Configuration",
         "description": "Endpoints to access the configuration data.",
+    },
+    {
+        "name": "Login",
+        "description": "Endpoints to login to the Elog API.",
+    },
+    {
+        "name": "ELogs",
+        "description": "Endpoints to the Elog API.",
     },
 ]

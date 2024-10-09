@@ -9,6 +9,8 @@ from routers import security_router
 from entities.base import Result, Config
 from services.database import get_db
 from services.config import ConfigService
+from libs.config import GLOBAL_API_KEY
+from libs.utils import encode
 
 router = APIRouter()
 
@@ -27,14 +29,16 @@ async def get_config(
     db: Session = Depends(get_db),
 ):
     try:
+        if encode(api_key) != GLOBAL_API_KEY:
+            raise Exception("Operation Not allowed.")
+
         cfg = ConfigService(db)
         data = cfg.list_config()
     except Exception as exc:
-        print(traceback.format_exc())
         return {
             "status": "Error",
-            "message": "Error selecting Configuration",
-            "data": [],
+            "message": "Error Getting Config",
+            "data": [{"msg": str(exc)}],
         }
     return {"status": "OK", "message": "Configurations listed.", "data": data}
 
@@ -54,16 +58,23 @@ async def get_token(
     db: Session = Depends(get_db),
 ):
     try:
+        if encode(api_key) != GLOBAL_API_KEY:
+            raise Exception("Operation Not allowed.")
+
         cfg = ConfigService(db)
-        data = await cfg.select_token(id)
+        data = cfg.select_token(id)
     except Exception as exc:
         print(traceback.format_exc())
         return {
             "status": "Error",
             "message": "Error getting token",
-            "data": [],
+            "data": [{"msg": str(exc)}],
         }
-    return {"status": "OK", "message": "Token available.", "data": data}
+    return {
+        "status": "OK",
+        "message": "Token available.",
+        "data": [data],
+    }
 
 
 @router.delete(
@@ -74,24 +85,27 @@ async def get_token(
     operation_id="delete_config",
 )
 async def delete_config(
-    id: int,
+    id: str,
     api_key: security_router.APIKey = security_router.Depends(
         security_router.get_api_key
     ),
     db: Session = Depends(get_db),
 ):
     try:
+        if encode(api_key) != GLOBAL_API_KEY:
+            raise Exception("Operation Not allowed.")
+
         cfg = ConfigService(db)
-        data = await cfg.delete_config(id)
+        data = cfg.delete_config(id)
 
     except Exception as exc:
         print(traceback.format_exc())
         return {
             "status": "Error",
             "message": "Error deleting Configuration",
-            "data": [],
+            "data": [{"msg": str(exc)}],
         }
-    return {"status": "OK", "message": "Configuration deleted.", "data": [id]}
+    return {"status": "OK", "message": "Configuration deleted.", "data": [{"id": id}]}
 
 
 @router.post(
@@ -109,6 +123,9 @@ async def add_config(
     db: Session = Depends(get_db),
 ):
     try:
+        if encode(api_key) != GLOBAL_API_KEY:
+            raise Exception("Operation Not allowed.")
+
         cfg = ConfigService(db)
         data = cfg.add_config(item)
     except Exception as exc:
@@ -116,7 +133,7 @@ async def add_config(
         return {
             "status": "Error",
             "message": "Error adding Configuration",
-            "data": [item],
+            "data": [{"msg": str(exc)}],
         }
 
     return {"status": "OK", "message": "Configuration added.", "data": []}
