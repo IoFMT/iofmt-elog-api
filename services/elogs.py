@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import json
+import traceback
 import requests
 
 from sqlalchemy import text
@@ -32,7 +33,7 @@ class ElogsService:
         except Exception as exc:
             raise Exception("Error Accessing ELog API")
 
-    def get_urls(self, token, base_url):
+    def get_urls(self, base_url, token):
         try:
             headers = {
                 "Content-Type": "application/json",
@@ -78,3 +79,282 @@ class ElogsService:
             return json.loads(response.text)
         except Exception as exc:
             raise Exception("Error Accessing ELog API - Not able to get Locations")
+
+    def get_tasks(self, token, base_url, site_id, page=1):
+        try:
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token,
+            }
+            final_url = f"{base_url}/sites/{site_id}/tasks?page={page}"
+            response = requests.request("GET", final_url, headers=headers)
+            return json.loads(response.text)
+        except Exception as exc:
+            raise Exception("Error Accessing ELog API - Not able to get Tasks")
+
+    def get_task(self, token, base_url, site_id, task_id):
+        try:
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token,
+            }
+            final_url = f"{base_url}/sites/{site_id}/tasks/{task_id}"
+            response = requests.request("GET", final_url, headers=headers)
+            return json.loads(response.text)
+        except Exception as exc:
+            raise Exception("Error Accessing ELog API - Not able to get Task")
+
+    def get_jobs_by(self, token, base_url, user_url, jobs_by):
+        try:
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token,
+            }
+            final_url = None
+            if jobs_by.by == "service provider":
+                final_url = (
+                    f"{base_url}/{user_url}/jobs?serviceProvider={jobs_by.values[0]}"
+                )
+            elif jobs_by.by == "status":
+                final_url = f"{base_url}/{user_url}/jobs?{'&'.join(['status[]='+x for x in jobs_by.values])}"
+            elif jobs_by.by == "range":
+                final_url = f"{base_url}/{user_url}/jobs?createdAtStart={jobs_by.values[0]}&createdAtEnd={jobs_by.values[1]}"
+            elif jobs_by.by == "type":
+                final_url = f"{base_url}/{user_url}/jobs?type={jobs_by.values[0]}"
+            response = requests.request("GET", final_url, headers=headers)
+            return json.loads(response.text)
+        except Exception as exc:
+            raise Exception("Error Accessing ELog API - Not able to get Jobs By")
+
+    def get_jobs(self, token, base_url, site_id, job_id=None, page=1):
+        try:
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token,
+            }
+            if job_id:
+                final_url = f"{base_url}/sites/{site_id}/jobs/{job_id}"
+            else:
+                final_url = f"{base_url}/sites/{site_id}/jobs?page={page}"
+            response = requests.request("GET", final_url, headers=headers)
+            return json.loads(response.text)
+        except Exception as exc:
+            raise Exception("Error Accessing ELog API - Not able to get Jobs")
+
+    def acknowledge_job(self, token, base_url, site_id, job_id, job_data):
+        try:
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token,
+            }
+            final_url = (
+                f"{base_url}/sites/{site_id}/jobs/{job_id}/workflow/assignment/accept"
+            )
+            payload = job_data
+            response = requests.request(
+                "POST", final_url, headers=headers, json=payload
+            )
+            if response.status_code < 300:
+                return {"status": response.text}
+            raise Exception(f"\n url: {final_url} \n response: {response.text}")
+        except Exception as exc:
+            raise Exception(
+                f"Error Accessing ELog API - Not able to complete Job\n Explanation:{exc}"
+            )
+
+    def commence_job(self, token, base_url, site_id, job_id, job_data):
+        try:
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token,
+            }
+            final_url = (
+                f"{base_url}/sites/{site_id}/jobs/{job_id}/workflow/operation/commence"
+            )
+            payload = job_data
+            response = requests.request(
+                "POST", final_url, headers=headers, data=payload
+            )
+            if response.status_code < 300:
+                return {"status": response.text}
+            raise Exception(f"\n url: {final_url} \n response: {response.text}")
+        except Exception as exc:
+            raise Exception(
+                f"Error Accessing ELog API - Not able to complete Job\n Explanation:{exc}"
+            )
+
+    def complete_job(self, token, base_url, site_id, job_id, job_data):
+        try:
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token,
+            }
+            final_url = (
+                f"{base_url}/sites/{site_id}/jobs/{job_id}/workflow/operation/complete"
+            )
+            payload = job_data
+            response = requests.request(
+                "POST", final_url, headers=headers, json=payload
+            )
+
+            if response.status_code < 300:
+                return {"status": response.text}
+            raise Exception(f"\n url: {final_url} \n response: {response.text}")
+        except Exception as exc:
+            raise Exception(
+                f"Error Accessing ELog API - Not able to complete Job\n Explanation:{exc}"
+            )
+
+    def complete_paperwork(self, token, base_url, site_id, job_id, job_data):
+        try:
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token,
+            }
+            final_url = f"{base_url}/sites/{site_id}/jobs/{job_id}/workflow/operation/complete-paperwork"
+            payload = job_data
+            response = requests.request(
+                "POST", final_url, headers=headers, json=payload
+            )
+
+            if response.status_code < 300:
+                return {"status": response.text}
+            raise Exception(f"\n url: {final_url} \n response: {response.text}")
+        except Exception as exc:
+            raise Exception(
+                f"Error Accessing ELog API - Not able to complete paperwork\n Explanation:{exc}"
+            )
+
+    def create_job(self, token, base_url, site_id, job_data):
+        try:
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token,
+            }
+            final_url = f"{base_url}/sites/{site_id}/jobs/reactive"
+            payload = job_data
+            response = requests.request(
+                "POST", final_url, headers=headers, json=payload
+            )
+            if response.status_code < 300:
+                return {
+                    "status": response.status_code,
+                    "data": json.loads(response.text),
+                }
+
+            raise Exception(f"\n url: {final_url} \n response: {response.text}")
+        except Exception as exc:
+            raise Exception(
+                f"Error Accessing ELog API - Not able to create Job\n Explanation:{exc}"
+            )
+
+    def approve_job(self, token, base_url, site_id, job_id, status, job_data):
+        try:
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token,
+            }
+            final_url = (
+                f"{base_url}/sites/{site_id}/jobs/{job_id}/workflow/approval/{status}"
+            )
+            payload = job_data
+            response = requests.request(
+                "POST", final_url, headers=headers, json=payload
+            )
+            if response.status_code < 300:
+                return {"status": response.text}
+            raise Exception(f"\n url: {final_url} \n response: {response.text}")
+        except Exception as exc:
+            raise Exception(
+                f"Error Accessing ELog API - Not able to {status} Job\n Explanation:{exc}"
+            )
+
+    def request_job_extension(self, token, base_url, site_id, job_id, note):
+        try:
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token,
+            }
+            final_url = (
+                f"{base_url}/sites/{site_id}/jobs/{job_id}/workflow/operation/extension"
+            )
+            payload = {"note": note}
+            response = requests.request(
+                "POST", final_url, headers=headers, json=payload
+            )
+            if response.status_code < 300:
+                return {"status": response.text}
+            raise Exception(f"\n url: {final_url} \n response: {response.text}")
+        except Exception as exc:
+            raise Exception(
+                f"Error Accessing ELog API - Not able to complete Job\n Explanation:{exc}"
+            )
+
+    def accept_job_extension(self, token, base_url, site_id, job_id, status, job_data):
+        try:
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token,
+            }
+            final_url = f"{base_url}/sites/{site_id}/jobs/{job_id}/workflow/operation/extension/{status}"
+            payload = job_data
+            response = requests.request(
+                "POST", final_url, headers=headers, json=payload
+            )
+            if response.status_code < 300:
+                return {"status": response.text}
+            raise Exception(f"\n url: {final_url} \n response: {response.text}")
+        except Exception as exc:
+            raise Exception(
+                f"Error Accessing ELog API - Not able to complete Job\n Explanation:{exc}"
+            )
+
+    def get_file_data(self, token, base_url, file_data):
+        try:
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token,
+            }
+            final_url = f"{base_url}/files"
+            payload = file_data
+            response = requests.request(
+                "POST", final_url, headers=headers, json=payload
+            )
+            if response.status_code < 300:
+                return json.loads(response.text)
+            raise Exception(f"\n url: {final_url} \n response: {response.text}")
+        except Exception as exc:
+            raise Exception(
+                f"Error Accessing ELog API - Not able to get file data\n Explanation:{exc}"
+            )
+
+    def upload_file(self, token, image_data, file_name, file_type):
+        try:
+            url = "https://storage.googleapis.com/apidocs1-elogbooks-staging"
+
+            payload = {
+                "signature": image_data.signature,
+                "Content-Disposition": image_data.content_disposition,
+                "policy": image_data.policy,
+                "success_action_redirect": image_data.success_action_redirect,
+                "key": image_data.key,
+                "GoogleAccessId": image_data.google_access_id,
+                "bucket": image_data.bucket,
+            }
+
+            files = [("file", (file_name, open(file_name, "rb"), file_type))]
+
+            headers = {
+                "content-type": "multipart/form-data",
+                "Authorization": "Bearer " + token,
+            }
+
+            response = requests.request(
+                "POST", url, headers=headers, data=payload, files=files
+            )
+
+            print(response.text)
+
+        except:
+            print(traceback.format_exc())
+        return {"status": "OK"}

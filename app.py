@@ -21,7 +21,7 @@ from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.templating import Jinja2Templates
 
 from entities.base import Result
-from routers import config_router, login_router
+from routers import config_router, elogs_router, login_router
 
 from libs import config
 from libs.utils import decode, encode
@@ -36,6 +36,7 @@ templates = Jinja2Templates(directory="static")
 # -------------------------------------------------
 app.include_router(config_router.router)
 app.include_router(login_router.router)
+app.include_router(elogs_router.router)
 
 
 # -------------------------------------------------
@@ -147,8 +148,8 @@ app.openapi = custom_openapi
 async def get_api_status() -> Any:
     return {
         "status": "OK",
-        "message": "IoFMT REST API is running",
-        "data": [{"version": "1.0.0"}],
+        "message": "IoFMT Elogs REST API is running",
+        "data": [{"version": "0.1.0"}],
     }
 
 
