@@ -28,24 +28,21 @@
       <div id="Add" class="content-tab is-active">
         <form id="create-api-key-form">
           <div class="field">
-            <label class="label">Customer Name</label>
+            <label class="label">User Name</label>
             <div class="control">
-              <input class="input" type="text" id="customer-name" placeholder="Enter customer name" required>
+              <input class="input" type="text" id="user-name" placeholder="Enter user name" required>
             </div>
           </div>
           <div class="field">
-            <label class="label">SFG20 Access Token</label>
+            <label class="label">User Password</label>
             <div class="control">
-              <input class="input" type="text" id="access-token" placeholder="Enter access token" required>
+              <input class="input" type="password" id="user-pwd" placeholder="Enter user password" required>
             </div>
           </div>
           <div class="field">
-            <label class="label">SFG20 Environment</label>
-            <div class="select">
-              <select id="environment" placeholder="Select your environment" required>
-                <option value="DEMO">Demonstration</option>
-                <option value="PROD">Production</option>
-              </select>
+            <label class="label">ELogs URL</label>
+            <div class="control">
+              <input class="input" type="text" id="user-url" placeholder="Enter ELogs URL" required>
             </div>
           </div>
           <div class="field">
@@ -59,9 +56,9 @@
           <thead>
             <tr>
               <th>API Key</th>
-              <th>Customer Name</th>
-              <th>Access Token</th>
-              <th>Environment</th>
+              <th>User Name</th>
+              <th>Elogs URL</th>
+              <th>Token</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -88,19 +85,19 @@
     generateApiKeyButton.addEventListener('click', (event) => {
       event.preventDefault();
 
-      const customerName = document.getElementById('customer-name').value;
-      const accessToken = document.getElementById('access-token').value;
-      const environment = document.getElementById('environment').value;
+      const customerName = document.getElementById('user-name').value;
+      const accessToken = document.getElementById('user-pwd').value;
+      const environment = document.getElementById('user-url').value;
 
       // Generate API key (replace with your actual key generation logic)
-      const apiKey = `ak_${Math.random().toString(36).substring(2, 15)}`;
+      const apiKey = `el_${Math.random().toString(36).substring(2, 15)}`;
 
       if (customerName === '' || accessToken === '') {
         alert('Please fill in all fields.');
         return;
       }
 
-      fetch('/config/add', {
+      fetch('/config', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -108,9 +105,9 @@
         },
         body: JSON.stringify({
           api_key: apiKey,
-          customer_name: customerName,
-          access_token: accessToken,
-          sfg_environment: environment
+          user_name: customerName,
+          user_pwd: accessToken,
+          url: environment
         })
       });
 
@@ -125,7 +122,7 @@
       apiKeyList.innerHTML = ''; // Clear existing table rows
       let apiKeys = null;
 
-      fetch("/config/get/all", {
+      fetch("/config", {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -143,19 +140,36 @@
           row.appendChild(apiKeyCell);
 
           const customerNameCell = document.createElement('td');
-          customerNameCell.textContent = apiKey.customer_name;
+          customerNameCell.textContent = apiKey.user_name;
           row.appendChild(customerNameCell);
 
           const accessTokenCell = document.createElement('td');
-          accessTokenCell.textContent = apiKey.access_token;
+          accessTokenCell.textContent = apiKey.url;
           row.appendChild(accessTokenCell);
 
           const environmentCell = document.createElement('td');
-          environmentCell.textContent = apiKey.sfg_environment;
+          const textElement = document.createElement('span');
+          textElement.textContent = apiKey.token.substring(0, 20) + '...'; // Substitua pelo texto desejado
+          textElement.title = apiKey.token; // Substitua pela tooltip desejada
+          environmentCell.appendChild(textElement);
           row.appendChild(environmentCell);
 
 
           const actionCell = document.createElement('td');
+          // Cria o botão para copiar o token
+          const copyButton = document.createElement('button');
+          copyButton.classList.add('button', 'is-primary');
+          copyButton.textContent = 'Copy Token';
+          copyButton.onclick = function () {
+            // Copia o conteúdo do token para a área de transferência
+            navigator.clipboard.writeText(textElement.title)
+              .then(() => {
+                alert('Token copied!');
+              })
+              .catch(err => {
+                console.error('Token not copied', err);
+              });
+          };
           const deleteButton = document.createElement('button');
           deleteButton.textContent = 'Delete';
           deleteButton.classList.add('button', 'is-danger');
@@ -163,7 +177,7 @@
             // Implement delete functionality
             var result = confirm("Want to delete?");
             if (result) {
-              fetch(`/config/delete/${apiKey.api_key}`, {
+              fetch(`/config/${apiKey.api_key}`, {
                 method: 'DELETE',
                 headers: {
                   'Content-Type': 'application/json',
@@ -174,6 +188,7 @@
               });
             }
           });
+          actionCell.appendChild(copyButton);
           actionCell.appendChild(deleteButton);
           row.appendChild(actionCell);
           apiKeyList.appendChild(row);

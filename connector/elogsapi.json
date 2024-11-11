@@ -1,0 +1,1538 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "This REST API acts as a wrapper to interact with the ELog API.\n        <br><br>\n        This API is also mapped in a Power Platform Custom Connector.\n        <br><br>\n        To generate the API KEY for a customer, please go to: <a href='/admin' target='_blank'>Admin</a>",
+    "summary": "This is a wrapper REST API for ELog project",
+    "title": "IoFMT ELog Wrapper REST API",
+    "version": "0.1.0",
+    "x-logo": {
+      "url": "https://fastapi.tiangolo.com/img/logo-margin/logo-teal.png"
+    }
+  },
+  "paths": {
+    "/": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "schema": {
+              "$ref": "#/definitions/Result"
+            }
+          }
+        },
+        "tags": [
+          "Basic"
+        ],
+        "operationId": "get_api_status",
+        "summary": "Get Api Status"
+      }
+    },
+    "/config": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "schema": {
+              "$ref": "#/definitions/Result"
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyQuery": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "tags": [
+          "Configuration"
+        ],
+        "operationId": "get_config",
+        "summary": "Get Config"
+      },
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Config"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "schema": {
+              "$ref": "#/definitions/Result"
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "schema": {
+              "$ref": "#/definitions/HTTPValidationError"
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyQuery": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "tags": [
+          "Configuration"
+        ],
+        "operationId": "add_config",
+        "summary": "Add Config"
+      }
+    },
+    "/config/token/{id}": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "schema": {
+              "$ref": "#/definitions/Result"
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "schema": {
+              "$ref": "#/definitions/HTTPValidationError"
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyQuery": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "tags": [
+          "Configuration"
+        ],
+        "operationId": "get_token",
+        "summary": "Get Token"
+      }
+    },
+    "/config/{id}": {
+      "delete": {
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "schema": {
+              "$ref": "#/definitions/Result"
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "schema": {
+              "$ref": "#/definitions/HTTPValidationError"
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyQuery": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "tags": [
+          "Configuration"
+        ],
+        "operationId": "delete_config",
+        "summary": "Delete Config"
+      }
+    },
+    "/files": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "title": "File Data",
+              "type": "object"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "schema": {
+              "$ref": "#/definitions/Result"
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "schema": {
+              "$ref": "#/definitions/HTTPValidationError"
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyQuery": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "tags": [
+          "ELogs"
+        ],
+        "operationId": "get_file_data",
+        "summary": "Get File Data"
+      }
+    },
+    "/files/upload": {
+      "post": {
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "formData",
+            "name": "key",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "formData",
+            "name": "bucket",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "formData",
+            "name": "construct",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "formData",
+            "name": "google_access_id",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "formData",
+            "name": "content_disposition",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "formData",
+            "name": "policy",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "formData",
+            "name": "signature",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "formData",
+            "name": "success_action_redirect",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "format": "binary",
+            "in": "formData",
+            "name": "file_data",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "schema": {
+              "$ref": "#/definitions/Result"
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "schema": {
+              "$ref": "#/definitions/HTTPValidationError"
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyQuery": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "tags": [
+          "ELogs"
+        ],
+        "operationId": "upload_file",
+        "summary": "Upload File"
+      }
+    },
+    "/jobs": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "site_id",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "query",
+            "name": "job_id",
+            "required": false
+          },
+          {
+            "default": 1,
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "schema": {
+              "$ref": "#/definitions/Result"
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "schema": {
+              "$ref": "#/definitions/HTTPValidationError"
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyQuery": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "tags": [
+          "ELogs"
+        ],
+        "operationId": "get_jobs",
+        "summary": "Get Jobs"
+      }
+    },
+    "/jobs/acknowledge": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "site_id",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "query",
+            "name": "job_id",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/JobData"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "schema": {
+              "$ref": "#/definitions/Result"
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "schema": {
+              "$ref": "#/definitions/HTTPValidationError"
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyQuery": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "tags": [
+          "ELogs"
+        ],
+        "operationId": "acknowledge_job",
+        "summary": "Acknowledge Job"
+      }
+    },
+    "/jobs/approve": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "site_id",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "query",
+            "name": "job_id",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/JobData"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "schema": {
+              "$ref": "#/definitions/Result"
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "schema": {
+              "$ref": "#/definitions/HTTPValidationError"
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyQuery": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "tags": [
+          "ELogs"
+        ],
+        "operationId": "approve_job",
+        "summary": "Approve Job"
+      }
+    },
+    "/jobs/by": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/JobsBy"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "schema": {
+              "$ref": "#/definitions/Result"
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "schema": {
+              "$ref": "#/definitions/HTTPValidationError"
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyQuery": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "tags": [
+          "ELogs"
+        ],
+        "operationId": "get_jobs_by",
+        "summary": "Get Jobs By"
+      }
+    },
+    "/jobs/commence": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "site_id",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "query",
+            "name": "job_id",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/JobData"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "schema": {
+              "$ref": "#/definitions/Result"
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "schema": {
+              "$ref": "#/definitions/HTTPValidationError"
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyQuery": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "tags": [
+          "ELogs"
+        ],
+        "operationId": "commence_job",
+        "summary": "Commence Job"
+      }
+    },
+    "/jobs/complete": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "site_id",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "query",
+            "name": "job_id",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/JobData"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "schema": {
+              "$ref": "#/definitions/Result"
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "schema": {
+              "$ref": "#/definitions/HTTPValidationError"
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyQuery": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "tags": [
+          "ELogs"
+        ],
+        "operationId": "complete_paperwork_job",
+        "summary": "Complete Job"
+      }
+    },
+    "/jobs/complete-paperwork": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "site_id",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "query",
+            "name": "job_id",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/JobData"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "schema": {
+              "$ref": "#/definitions/Result"
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "schema": {
+              "$ref": "#/definitions/HTTPValidationError"
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyQuery": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "tags": [
+          "ELogs"
+        ],
+        "operationId": "complete_job",
+        "summary": "Complete Paperwork Job"
+      }
+    },
+    "/jobs/create": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "site_id",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/JobData"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "schema": {
+              "$ref": "#/definitions/Result"
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "schema": {
+              "$ref": "#/definitions/HTTPValidationError"
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyQuery": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "tags": [
+          "ELogs"
+        ],
+        "operationId": "create_job",
+        "summary": "Create Job"
+      }
+    },
+    "/jobs/extension/<status>": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "site_id",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "query",
+            "name": "job_id",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/JobData"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "schema": {
+              "$ref": "#/definitions/Result"
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "schema": {
+              "$ref": "#/definitions/HTTPValidationError"
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyQuery": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "tags": [
+          "ELogs"
+        ],
+        "operationId": "accept_job_extension",
+        "summary": "Accept Job Extension"
+      }
+    },
+    "/jobs/extension/request": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "site_id",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "query",
+            "name": "job_id",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/JobData"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "schema": {
+              "$ref": "#/definitions/Result"
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "schema": {
+              "$ref": "#/definitions/HTTPValidationError"
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyQuery": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "tags": [
+          "ELogs"
+        ],
+        "operationId": "request_job_extension",
+        "summary": "Request Job Extension"
+      }
+    },
+    "/jobs/reject": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "site_id",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "query",
+            "name": "job_id",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/JobData"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "schema": {
+              "$ref": "#/definitions/Result"
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "schema": {
+              "$ref": "#/definitions/HTTPValidationError"
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyQuery": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "tags": [
+          "ELogs"
+        ],
+        "operationId": "reject_job",
+        "summary": "Reject Job"
+      }
+    },
+    "/locations": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "site_id",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "default": 1,
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "schema": {
+              "$ref": "#/definitions/Result"
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "schema": {
+              "$ref": "#/definitions/HTTPValidationError"
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyQuery": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "tags": [
+          "ELogs"
+        ],
+        "operationId": "get_locations",
+        "summary": "Get Locations"
+      }
+    },
+    "/login": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "schema": {
+              "$ref": "#/definitions/Result"
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyQuery": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "tags": [
+          "Login"
+        ],
+        "operationId": "do_login",
+        "summary": "Login"
+      }
+    },
+    "/sites": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "site_name",
+            "required": false
+          },
+          {
+            "default": 1,
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "schema": {
+              "$ref": "#/definitions/Result"
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "schema": {
+              "$ref": "#/definitions/HTTPValidationError"
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyQuery": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "tags": [
+          "ELogs"
+        ],
+        "operationId": "get_sites",
+        "summary": "Get Sites"
+      }
+    },
+    "/tasks": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "site_id",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "query",
+            "name": "task_id",
+            "required": false
+          },
+          {
+            "default": 1,
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "schema": {
+              "$ref": "#/definitions/Result"
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "schema": {
+              "$ref": "#/definitions/HTTPValidationError"
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyQuery": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "tags": [
+          "ELogs"
+        ],
+        "operationId": "get_tasks",
+        "summary": "Get Tasks"
+      }
+    },
+    "/user": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "schema": {
+              "$ref": "#/definitions/Result"
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyQuery": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ],
+        "tags": [
+          "ELogs"
+        ],
+        "operationId": "get_user",
+        "summary": "Get User"
+      }
+    }
+  },
+  "definitions": {
+    "Body_upload_file": {
+      "properties": {
+        "bucket": {
+          "title": "Bucket",
+          "type": "string"
+        },
+        "construct": {
+          "title": "Construct",
+          "type": "string"
+        },
+        "content_disposition": {
+          "title": "Content Disposition",
+          "type": "string"
+        },
+        "file_data": {
+          "format": "binary",
+          "title": "File Data",
+          "type": "string"
+        },
+        "google_access_id": {
+          "title": "Google Access Id",
+          "type": "string"
+        },
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "policy": {
+          "title": "Policy",
+          "type": "string"
+        },
+        "signature": {
+          "title": "Signature",
+          "type": "string"
+        },
+        "success_action_redirect": {
+          "title": "Success Action Redirect",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "bucket",
+        "construct",
+        "google_access_id",
+        "content_disposition",
+        "policy",
+        "signature",
+        "success_action_redirect",
+        "file_data"
+      ],
+      "title": "Body_upload_file",
+      "type": "object"
+    },
+    "Config": {
+      "properties": {
+        "api_key": {
+          "description": "The newly generated API Key",
+          "title": "API Key",
+          "type": "string"
+        },
+        "expiration": {
+          "description": "The date to token expire",
+          "title": "Expiration"
+        },
+        "token": {
+          "description": "The login token of the ELog api user",
+          "title": "Token"
+        },
+        "url": {
+          "description": "The url of the ELog api user",
+          "title": "URL",
+          "type": "string"
+        },
+        "user_name": {
+          "description": "The user name of the ELog api user",
+          "title": "User Name",
+          "type": "string"
+        },
+        "user_pwd": {
+          "description": "The user password of the ELog api user",
+          "title": "User Password",
+          "type": "string"
+        }
+      },
+      "required": [
+        "api_key",
+        "user_name",
+        "user_pwd",
+        "url"
+      ],
+      "title": "Config",
+      "type": "object"
+    },
+    "HTTPValidationError": {
+      "properties": {
+        "detail": {
+          "items": {
+            "$ref": "#/definitions/ValidationError"
+          },
+          "title": "Detail",
+          "type": "array"
+        }
+      },
+      "title": "HTTPValidationError",
+      "type": "object"
+    },
+    "JobData": {
+      "properties": {
+        "completionDate": {
+          "title": "Completiondate"
+        },
+        "description": {
+          "title": "Description"
+        },
+        "files": {
+          "title": "Files"
+        },
+        "isByPlannedDate": {
+          "title": "Isbyplanneddate"
+        },
+        "isOnNextPlannedVisit": {
+          "title": "Isonnextplannedvisit"
+        },
+        "noRequisiteRequired": {
+          "title": "Norequisiterequired"
+        },
+        "note": {
+          "title": "Note"
+        },
+        "notifyOnComplete": {
+          "title": "Notifyoncomplete"
+        },
+        "notifyOnCreate": {
+          "title": "Notifyoncreate"
+        },
+        "onSiteDate": {
+          "title": "Onsitedate"
+        },
+        "siteContact": {},
+        "siteContactAvailableOnSite": {
+          "title": "Sitecontactavailableonsite"
+        },
+        "siteContactSameAsReporter": {
+          "title": "Sitecontactsameasreporter"
+        },
+        "summary": {
+          "title": "Summary"
+        }
+      },
+      "title": "JobData",
+      "type": "object"
+    },
+    "JobsBy": {
+      "properties": {
+        "by": {
+          "description": "The type of the job grouping",
+          "enum": [
+            "service provider",
+            "status",
+            "range",
+            "type"
+          ],
+          "title": "By",
+          "type": "string"
+        },
+        "values": {
+          "description": "The values of the grouping",
+          "items": {
+            "type": "string"
+          },
+          "title": "Values",
+          "type": "array"
+        }
+      },
+      "required": [
+        "by",
+        "values"
+      ],
+      "title": "JobsBy",
+      "type": "object"
+    },
+    "Result": {
+      "properties": {
+        "data": {
+          "description": "The data of the request",
+          "items": {
+            "type": "object"
+          },
+          "title": "Data",
+          "type": "array"
+        },
+        "message": {
+          "description": "The message of the request",
+          "title": "Message",
+          "type": "string"
+        },
+        "status": {
+          "description": "The status of the request",
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "message",
+        "data"
+      ],
+      "title": "Result",
+      "type": "object"
+    },
+    "SiteContact": {
+      "properties": {
+        "declineEmail": {
+          "title": "Declineemail",
+          "type": "boolean"
+        },
+        "notifyOnComplete": {
+          "title": "Notifyoncomplete",
+          "type": "boolean"
+        },
+        "notifyOnCreate": {
+          "title": "Notifyoncreate",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "notifyOnCreate",
+        "notifyOnComplete",
+        "declineEmail"
+      ],
+      "title": "SiteContact",
+      "type": "object"
+    },
+    "ValidationError": {
+      "properties": {
+        "loc": {
+          "items": {},
+          "title": "Location",
+          "type": "array"
+        },
+        "msg": {
+          "title": "Message",
+          "type": "string"
+        },
+        "type": {
+          "title": "Error Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "loc",
+        "msg",
+        "type"
+      ],
+      "title": "ValidationError",
+      "type": "object"
+    }
+  },
+  "securityDefinitions": {
+    "APIKeyCookie": {
+      "in": "cookie",
+      "name": "X-Access-Token",
+      "type": "apiKey"
+    },
+    "APIKeyHeader": {
+      "in": "header",
+      "name": "X-Access-Token",
+      "type": "apiKey"
+    },
+    "APIKeyQuery": {
+      "in": "query",
+      "name": "X-Access-Token",
+      "type": "apiKey"
+    }
+  },
+  "tags": [
+    {
+      "description": "Endpoint without authentication to check the API status.",
+      "name": "Basic"
+    },
+    {
+      "description": "Endpoints to access the configuration data.",
+      "name": "Configuration"
+    },
+    {
+      "description": "Endpoints to login to the Elog API.",
+      "name": "Login"
+    },
+    {
+      "description": "Endpoints to the Elog API.",
+      "name": "ELogs"
+    }
+  ],
+  "x-components": {}
+}

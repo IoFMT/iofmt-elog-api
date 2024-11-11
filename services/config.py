@@ -39,7 +39,7 @@ class ConfigService:
                 {
                     "api_key": res[0],
                     "user_name": res[1],
-                    "user_pwd": res[2],
+                    "token": res[3],
                     "url": res[4],
                 }
             )
