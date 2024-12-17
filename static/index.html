@@ -132,6 +132,7 @@
         return response.json();
       }).then((data) => {
         apiKeys = data.data;
+        console.log(apiKeys);
         apiKeys.forEach((apiKey) => {
           const row = document.createElement('tr');
 
@@ -149,8 +150,13 @@
 
           const environmentCell = document.createElement('td');
           const textElement = document.createElement('span');
-          textElement.textContent = apiKey.token.substring(0, 20) + '...'; // Substitua pelo texto desejado
-          textElement.title = apiKey.token; // Substitua pela tooltip desejada
+          if (apiKey.token) {
+            textElement.textContent = (apiKey.token.substring(0, 20) + '...'); // Substitua pelo texto desejado
+            textElement.title = apiKey.token; // Substitua pela tooltip desejada
+          } else {
+            textElement.textContent = 'Token not found';
+            textElement.title = 'You need to login with the api key for the first time to generate a Elogs token'; // Substitua pela tooltip desejada
+          }
           environmentCell.appendChild(textElement);
           row.appendChild(environmentCell);
 
