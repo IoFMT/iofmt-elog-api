@@ -12,3 +12,7 @@ psycopg2-binary
 sqlalchemy
 requests
 jinja2
+itsdangerous
+aiohttp
+starlette
+pyjwt

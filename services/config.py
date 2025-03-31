@@ -4,9 +4,8 @@ import json
 
 from sqlalchemy import text
 
-
-from libs import config
 from entities.base import Config
+from libs import config
 
 
 class ConfigService:
@@ -18,7 +17,8 @@ class ConfigService:
     def add_config(self, data: Config):
         stmt = text(config.CACHE_SQL_INSERT_CONFIG)
         stmt = stmt.bindparams(
-            p1=data.api_key, p2=data.user_name, p3=data.user_pwd, p4=data.url
+            p1=data.api_key, p2=data.account_number, p3=data.user_name,
+            p4=data.url, p5=data.created_date_time, p6=data.created_by
         )
         self.db.execute(stmt)
         self.db.commit()
@@ -30,7 +30,9 @@ class ConfigService:
         self.db.commit()
 
     def list_config(self):
-        stmt = text("SELECT * FROM elogapi.config")
+        stmt = text("SELECT api_key, account_number, user_name, url, token, expiration, "
+                    "created_date_time, created_by "
+                    "FROM elogapi.config")
         result = self.db.execute(stmt).fetchall()
 
         results = []
@@ -38,24 +40,28 @@ class ConfigService:
             results.append(
                 {
                     "api_key": res[0],
-                    "user_name": res[1],
-                    "token": res[3],
-                    "url": res[4],
+                    "account_number": res[1],
+                    "user_name": res[2],
+                    "url": res[3],
+                    "token": res[4],
+                    "expiration": res[5],
+                    "created_date_time": res[6],
+                    "created_by": res[7],
                 }
             )
 
         return results
 
     def select_config(self, api_key):
-        stmt = text("SELECT * FROM elogapi.config where api_key = :p1")
+        stmt = text("SELECT api_key, user_name, account_number, url FROM elogapi.config where api_key = :p1")
         stmt = stmt.bindparams(p1=api_key)
         res = self.db.execute(stmt).fetchall()[0]
 
         results = {
             "api_key": res[0],
             "user_name": res[1],
-            "user_pwd": res[2],
-            "url": res[4],
+            "account_number": res[2],
+            "url": res[3],
         }
 
         return results
@@ -73,16 +79,25 @@ class ConfigService:
         stmt = stmt.bindparams(p1=api_key)
         result = self.db.execute(stmt).fetchone()
 
-        return (
-            {
-                "url": result[0],
-                "token": result[1],
-                "expiration": result[2],
-                "other_urls": json.loads(result[3]),
-            }
-            if result
-            else None
-        )
+        if not result:
+            return None
+
+        # Handle NULL other_urls by defaulting to empty list/dict
+        other_urls = result[3]
+        parsed_other_urls = json.loads(other_urls) if other_urls is not None else []
+
+        response = {
+            "url": result[0],
+            "token": result[1],
+            "expiration": result[2],
+            "other_urls": parsed_other_urls,
+        }
+
+        # Check if token is null and raise an exception if it is
+        if response["token"] is None:
+            raise Exception("Token is null or not available")
+
+        return response
 
     def update_token(self, api_key, token, expiration, other_urls):
         stmt = text(

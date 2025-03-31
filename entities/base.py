@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-from pydantic import BaseModel, Field
+from datetime import datetime
 from typing import Literal, Optional
-from enum import Enum
+
+import jwt
+from pydantic import BaseModel, Field, field_validator
 
 
 class Result(BaseModel):
@@ -13,9 +15,14 @@ class Result(BaseModel):
 
 
 class Config(BaseModel):
-    api_key: str = Field(
+    api_key: Optional[str] = Field(
+        None,
         title="API Key",
         description="The newly generated API Key",
+    )
+    account_number: int = Field(
+        title="Account Number",
+        description="Numeric unique identifier for client organization"
     )
     user_name: str = Field(
         title="User Name", description="The user name of the ELog api user"
@@ -25,8 +32,8 @@ class Config(BaseModel):
         description="The user password of the ELog api user",
     )
     url: str = Field(
-        title="URL",
-        description="The url of the ELog api user",
+        title="Elogs URL",
+        description="The url of the ELog api user"
     )
     token: str | None = Field(
         None, title="Token", description="The login token of the ELog api user"
@@ -34,6 +41,84 @@ class Config(BaseModel):
     expiration: int | None = Field(
         None, title="Expiration", description="The date to token expire"
     )
+    created_date_time: datetime = Field(
+        default_factory=datetime.now,
+        title="Created Date Time",
+        description="When this client organization was created"
+    )
+    created_by: Optional[str] = Field(
+        None,  # Default to None to make it optional
+        title="Created By",
+        description="Username of person who created this client organization"
+    )
+
+    @field_validator('url')
+    def validate_url(cls, v):
+        try:
+            from urllib.parse import urlparse
+            result = urlparse(v)
+            if all([result.scheme, result.netloc]):
+                return v
+            raise ValueError("Invalid URL format")
+        except Exception:
+            raise ValueError("Invalid URL format")
+
+    @staticmethod
+    def verify_api_key(token: str, secret_key: str) -> dict:
+        """
+        Verify and decode a JWT token
+
+        Args:
+            token: The JWT token to verify
+            secret_key: Secret key used to verify the JWT signature
+
+        Returns:
+            The decoded payload if verification succeeds
+
+        Raises:
+            jwt.InvalidTokenError: If token verification fails
+        """
+        try:
+            payload = jwt.decode(token, secret_key, algorithms=["HS256"])
+            return payload
+        except jwt.InvalidTokenError:
+            raise ValueError("Invalid API key")
+
+    def generate_jwt_api_key(self, secret_key: str) -> 'Config':
+        """
+        Generate a JWT token for this Config instance using the account_number as the key.
+        The payload includes only url, created_date_time, created_by, account_number, user_name,
+        and cache_key (<account_number>-<user_name>).
+
+        Args:
+            secret_key: Secret key used to sign the JWT
+
+        Returns:
+            The updated Config instance with the new JWT API key
+        """
+        # Generate cache key
+        cache_key = f"{self.account_number}-{self.user_name}"
+
+        # Define payload with only the required fields
+        payload = {
+            "url": self.url,
+            "created_date_time": self.created_date_time.isoformat(),  # Convert datetime to string
+            "created_by": self.created_by,
+            "account_number": self.account_number,
+            "user_name": self.user_name,
+            "cache_key": cache_key,
+            # Set expiration to a very distant future (effectively "forever")
+            "exp": datetime(2099, 12, 31).timestamp()  # Far future expiration
+        }
+
+        # Generate JWT
+        token = jwt.encode(payload, secret_key, algorithm="HS256")
+
+        # Update the current instance
+        self.api_key = token
+        self.expiration = int(datetime(2099, 12, 31).timestamp())  # Same far future expiration
+
+        return self
 
 
 class JobsBy(BaseModel):

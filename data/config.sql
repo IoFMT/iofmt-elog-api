@@ -15,13 +15,22 @@ CREATE TABLE IF NOT EXISTS elogapi.config (
 	user_name varchar(100) NOT NULL,
 	user_pwd varchar(100) NOT NULL,
 	token text NULL,
-  url text null,
-  expiration integer null,
-  other_urls text null,
+    url text null,
+    expiration integer null,
+    other_urls text null,
 	CONSTRAINT config_pkey PRIMARY KEY (api_key)
 );
 
 -- Permissions
 
-ALTER TABLE elogapi.config OWNER TO iofmtadm;
+ALTER TABLE elogapi.config
+    OWNER TO iofmtadm;
 GRANT ALL ON TABLE elogapi.config TO iofmtadm;
+
+ALTER TABLE elogapi.config
+    DROP COLUMN IF EXISTS user_pwd,
+    ALTER COLUMN api_key TYPE TEXT,
+    ADD COLUMN account_number    INTEGER NOT NULL,
+    ADD COLUMN created_date_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ADD COLUMN created_by        VARCHAR(255),
+    ADD CONSTRAINT config_url_username_unique UNIQUE (url, user_name);

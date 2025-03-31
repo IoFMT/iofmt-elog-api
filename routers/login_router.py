@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 import traceback
 
+from libs.config import app_cache
 from routers import security_router
 from entities.base import Result, JobsBy
 from services.database import get_db
@@ -32,6 +33,18 @@ async def login(
     try:
         cfg = ConfigService(db)
         data = cfg.select_config(api_key)
+        cache_key = f"{data['account_number']}-{data['user_name']}"
+        data['user_pwd'] = app_cache.get(cache_key)
+
+        # Check if password is available in the cache
+        if not data['user_pwd']:
+            return {
+                "status": "Error",
+                "message": "Authentication Failed",
+                "data": [{
+                    "msg": f"Password for user '{data['user_name']}' is no longer in memory cache. Please recreate this user configuration."
+                }],
+            }
 
         elog = ElogsService(db)
         response = elog.login(data)

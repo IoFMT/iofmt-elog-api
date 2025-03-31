@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
-from fastapi import APIRouter, Depends, HTTPException, Security
-from fastapi.openapi.docs import get_swagger_ui_html
-from fastapi.openapi.utils import get_openapi
+import jwt
+from fastapi import Depends, HTTPException, Security
 from fastapi.security.api_key import APIKey, APIKeyCookie, APIKeyHeader, APIKeyQuery
-from starlette.responses import JSONResponse, RedirectResponse
 from starlette.status import HTTP_403_FORBIDDEN
 
 
@@ -16,7 +14,6 @@ from services.database import get_db
 
 API_KEY = None
 API_KEY_NAME = "X-Access-Token"
-COOKIE_DOMAIN = "localhost"
 
 api_key_query = APIKeyQuery(name=API_KEY_NAME, auto_error=False)
 api_key_header = APIKeyHeader(name=API_KEY_NAME, auto_error=False)
@@ -29,8 +26,19 @@ def retrieve_api_key(api_key: str, db: Session):
     else:
         cfg = service_config.ConfigService(db)
         results = cfg.exist_config(api_key)
-        return api_key if results else None
 
+        # If the key exists in the database, we should try to verify it
+        if results:
+            try:
+                # Make sure to use the actual secret key from your config
+                decoded_jwt = jwt.decode(api_key, config.JWT_SECRET_KEY, algorithms=["HS256"])
+                return api_key  # Return the key if it's valid
+            except jwt.ExpiredSignatureError:
+                return None  # Return None for expired tokens
+            except jwt.InvalidTokenError:
+                return None  # Return None for invalid tokens
+        else:
+            return None  # Return None if the key doesn't exist in the database
 
 async def get_api_key(
     api_key_query: str = Security(api_key_query),

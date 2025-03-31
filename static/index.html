@@ -1,224 +1,562 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>API Key Management</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
-  <style>
-    .tab-content {
-      padding: 20px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Config Management</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+
+    <style>
+        .container {
+            margin-top: 2rem;
+        }
+
+        #config-table {
+            margin-top: 1rem;
+        }
+
+        .button.is-small {
+            margin-right: 0.5rem;
+        }
+
+        /* Added styles for user controls */
+        .user-controls {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-greeting {
+            border-right: 1px solid #eeeeee;
+            padding-right: 0.75rem;
+        }
+
+        .logout-button {
+            border-radius: 20px;
+            padding-left: 1.25rem;
+            padding-right: 1.25rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease;
+            margin-left: 0.75rem;
+        }
+
+        /* Animation for notifications */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .notification {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        /* Add styles for API key copy button */
+        .api-key-field {
+            display: flex;
+            align-items: center;
+        }
+
+        .copy-button {
+            margin-left: 0.5rem;
+        }
+
+        /* Truncated text for long values */
+        .truncate {
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        thead th {
+            position: sticky;
+            top: 0;
+            background-color: white;
+            z-index: 1;
+            border-bottom: 2px solid #dbdbdb;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            max-width: 100%;
+        }
+
+        /* Specific column widths */
+        #config-table th:nth-child(1),
+        #config-table td:nth-child(1) {
+            max-width: 160px; /* API Key */
+        }
+
+        #config-table th:nth-child(2),
+        #config-table td:nth-child(2) {
+            max-width: 80px; /* Account Number */
+        }
+
+        #config-table th:nth-child(3),
+        #config-table td:nth-child(3) {
+            max-width: 80px; /* User Name */
+        }
+
+        #config-table th:nth-child(5),
+        #config-table td:nth-child(5) {
+            max-width: 120px; /* Token */
+        }
+
+        /* Improve truncate class */
+        .truncate {
+            max-width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: inline-block;
+        }
+
+    </style>
 </head>
 
 <body>
-  <div class="container">
-    <h1 class="title is-3">API Key Management</h1>
 
-    <div class="tabs is-boxed">
-      <ul>
-        <li class="tab is-active" onclick="openTab(event, 'Add')"><a>Create API Key</a></li>
-        <li class="tab" onclick="openTab(event, 'List')"><a>API Keys List</a></li>
-      </ul>
+{% if not name %}
+<div class="container has-text-centered" style="margin-top: 5rem;">
+    <div class="box"
+         style="max-width: 500px; margin: 0 auto; border-radius: 8px; box-shadow: 0 8px 16px rgba(10, 10, 10, 0.1);">
+        <h1 class="title is-3">API Key Management</h1>
+        <div class="is-divider"
+             style="margin-top: 1rem; margin-bottom: 2rem; height: 1px; background-color: #dbdbdb;"></div>
+
+        <div class="content">
+            <p class="is-size-4 mb-5">Kindly login here to get access</p>
+
+            <a href="/az/login" class="button is-primary is-medium"
+               style="padding-left: 2rem; padding-right: 2rem; border-radius: 25px; font-weight: 600; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15); transition: all 0.3s ease;">
+                <span class="icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                         viewBox="0 0 16 16">
+                      <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/>
+                    </svg>
+                </span>
+                <span>Sign in</span>
+            </a>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="container" x-data="configApp()" x-init="loadUserConfigs()">
+    <!-- Header with user info and logout button -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin: 1rem 0; padding: 1rem 0; border-bottom: 1px solid #f1f1f1;">
+        <h1 class="title is-3 mb-0">User Config Management</h1>
+        <div class="user-controls">
+            <div class="user-greeting">
+                    <span class="icon-text">
+                        <span class="icon has-text-grey">
+                            <i class="fas fa-user"></i>
+                        </span>
+                        <span class="has-text-weight-medium">{{ name }}</span>
+                    </span>
+            </div>
+            <a href="/az/logout" class="button is-primary is-light logout-button">
+                    <span class="icon">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </span>
+                <span>Sign out</span>
+            </a>
+        </div>
+    </div>
+    <!-- Stacked Notifications Container -->
+    <div style="position: fixed; top: 1rem; right: 1rem; z-index: 1000; display: flex; flex-direction: column; gap: 0.75rem;">
+        <template x-for="note in notifications" :key="note.id">
+            <div class="notification"
+                 :class="note.type === 'success' ? 'is-success' : 'is-danger'"
+                 x-show="note.show"
+                 x-transition
+                 style="
+                    width: 360px;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    display: flex;
+                    justify-content: flex-start;
+                    align-items: center;
+                    text-align: left;
+                    gap: 0.75rem;
+                    padding: 0.75rem 2.5rem 0.75rem 1rem;
+                    position: relative;
+                    margin: 0 auto;
+                 ">
+
+                <!-- Icon -->
+                <span class="icon is-small" style="color: white; flex-shrink: 0; padding: 10px;">
+                    <i :class="note.type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-triangle'"></i>
+                </span>
+                <!-- Message -->
+                <span style="color: white; font-weight: 600; line-height: 1.3; flex: 1;" x-text="note.message"></span>
+                <!-- Close Button -->
+                <button @click="note.show = false"
+                        aria-label="Close notification"
+                        style="
+                            position: absolute;
+                            top: 0.5rem;
+                            right: 0.5rem;
+                            background-color: rgba(255, 255, 255, 0.25);
+                            border-radius: 9999px;
+                            width: 1.5rem;
+                            height: 1.5rem;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            border: none;
+                            cursor: pointer;
+                        ">
+                    <i class="fas fa-times" style="color: white; font-size: 0.75rem;"></i>
+                </button>
+            </div>
+        </template>
     </div>
 
-    <div class="container">
-      <div id="Add" class="content-tab is-active">
-        <form id="create-api-key-form">
-          <div class="field">
-            <label class="label">User Name</label>
-            <div class="control">
-              <input class="input" type="text" id="user-name" placeholder="Enter user name" required>
-            </div>
-          </div>
-          <div class="field">
-            <label class="label">User Password</label>
-            <div class="control">
-              <input class="input" type="password" id="user-pwd" placeholder="Enter user password" required>
-            </div>
-          </div>
-          <div class="field">
-            <label class="label">ELogs URL</label>
-            <div class="control">
-              <input class="input" type="text" id="user-url" placeholder="Enter ELogs URL" required>
-            </div>
-          </div>
-          <div class="field">
-            <button class="button is-primary" id="generate-api-key">Generate API Key</button>
-          </div>
-        </form>
-      </div>
 
-      <div id="List" class="content-tab" style="display:none">
-        <table class="table is-fullwidth">
-          <thead>
-            <tr>
-              <th>API Key</th>
-              <th>User Name</th>
-              <th>Elogs URL</th>
-              <th>Token</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody id="api-key-list">
-          </tbody>
-        </table>
-        <nav class="pagination" role="navigation" aria-label="pagination">
-          <a class="pagination-previous" disabled>Previous</a>
-          <a class="pagination-next" disabled>Next</a>
-          <ul class="pagination-list">
-          </ul>
-        </nav>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    let apiKeys = []; // Replace with actual data loading or storage
-
-    const generateApiKeyButton = document.getElementById('generate-api-key');
-    const apiKeyList = document.getElementById('api-key-list');
-    const createApiKeyForm = document.getElementById('create-api-key-form');
-
-    generateApiKeyButton.addEventListener('click', (event) => {
-      event.preventDefault();
-
-      const customerName = document.getElementById('user-name').value;
-      const accessToken = document.getElementById('user-pwd').value;
-      const environment = document.getElementById('user-url').value;
-
-      // Generate API key (replace with your actual key generation logic)
-      const apiKey = `el_${Math.random().toString(36).substring(2, 15)}`;
-
-      if (customerName === '' || accessToken === '') {
-        alert('Please fill in all fields.');
-        return;
-      }
-
-      fetch('/config', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Access-Token': '{{master_api_key}}'
-        },
-        body: JSON.stringify({
-          api_key: apiKey,
-          user_name: customerName,
-          user_pwd: accessToken,
-          url: environment
-        })
-      });
-
-      // Update API keys table
-      renderApiKeyList();
-
-      // Clear form fields
-      createApiKeyForm.reset();
-    });
-
-    function renderApiKeyList() {
-      apiKeyList.innerHTML = ''; // Clear existing table rows
-      let apiKeys = null;
-
-      fetch("/config", {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Access-Token': '{{master_api_key}}'
-        },
-      }).then((response) => {
-        return response.json();
-      }).then((data) => {
-        apiKeys = data.data;
-        console.log(apiKeys);
-        apiKeys.forEach((apiKey) => {
-          const row = document.createElement('tr');
-
-          const apiKeyCell = document.createElement('td');
-          apiKeyCell.textContent = apiKey.api_key;
-          row.appendChild(apiKeyCell);
-
-          const customerNameCell = document.createElement('td');
-          customerNameCell.textContent = apiKey.user_name;
-          row.appendChild(customerNameCell);
-
-          const accessTokenCell = document.createElement('td');
-          accessTokenCell.textContent = apiKey.url;
-          row.appendChild(accessTokenCell);
-
-          const environmentCell = document.createElement('td');
-          const textElement = document.createElement('span');
-          if (apiKey.token) {
-            textElement.textContent = (apiKey.token.substring(0, 20) + '...'); // Substitua pelo texto desejado
-            textElement.title = apiKey.token; // Substitua pela tooltip desejada
-          } else {
-            textElement.textContent = 'Token not found';
-            textElement.title = 'You need to login with the api key for the first time to generate a Elogs token'; // Substitua pela tooltip desejada
-          }
-          environmentCell.appendChild(textElement);
-          row.appendChild(environmentCell);
+    <section class="section">
+        <h2 class="title is-4">Enter New User Details</h2>
+        <div class="box">
+            <fieldset :disabled="loading">
+                <form @submit.prevent="addUserConfig">
+                    <div class="field is-horizontal">
+                        <div class="field-body">
+                            <div class="field">
+                                <label class="label">Account Number</label>
+                                <div class="control">
+                                    <input class="input" type="text" placeholder="Account Number"
+                                           x-model.number="newConfig.account_number"
+                                           @keypress="isNumber($event)">
+                                </div>
+                            </div>
+                            <div class="field">
+                                <label class="label">Elogs URL</label>
+                                <div class="control">
+                                    <input class="input" type="text" placeholder="https://elogs.example.com" x-model="newConfig.url">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field is-horizontal">
+                        <div class="field-body">
+                            <div class="field">
+                                <label class="label">User Name</label>
+                                <div class="control">
+                                    <input class="input" type="text" placeholder="User Name" x-model="newConfig.user_name">
+                                </div>
+                            </div>
+                            <div class="field">
+                                <label class="label">Password</label>
+                                <div class="control">
+                                    <input class="input" type="password" placeholder="Password" x-model="newConfig.user_pwd">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field is-grouped">
+                        <button type="submit" class="button is-primary"
+                                :disabled="!newConfig.account_number || !newConfig.url || !newConfig.user_name || !newConfig.user_pwd"
+                                :class="{'is-loading': loading}">
+                            Create
+                        </button>
+                    </div>
+                </form>
+            </fieldset>
+        </div>
 
 
-          const actionCell = document.createElement('td');
-          // Cria o botão para copiar o token
-          const copyButton = document.createElement('button');
-          copyButton.classList.add('button', 'is-primary');
-          copyButton.textContent = 'Copy Token';
-          copyButton.onclick = function () {
-            // Copia o conteúdo do token para a área de transferência
-            navigator.clipboard.writeText(textElement.title)
-              .then(() => {
-                alert('Token copied!');
-              })
-              .catch(err => {
-                console.error('Token not copied', err);
-              });
-          };
-          const deleteButton = document.createElement('button');
-          deleteButton.textContent = 'Delete';
-          deleteButton.classList.add('button', 'is-danger');
-          deleteButton.addEventListener('click', () => {
-            // Implement delete functionality
-            var result = confirm("Want to delete?");
-            if (result) {
-              fetch(`/config/${apiKey.api_key}`, {
-                method: 'DELETE',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'X-Access-Token': '{{master_api_key}}'
-                },
-              }).then(() => {
-                renderApiKeyList();
-              });
+        <h2 class="title is-4 mt-6">User List</h2>
+
+        <!-- Loading indicator -->
+        <div class="has-text-centered py-4" x-show="loading">
+                <span class="icon is-large">
+                    <i class="fas fa-spinner fa-pulse fa-2x"></i>
+                </span>
+            <p class="mt-2">Loading configs...</p>
+        </div>
+
+        <!-- User Config Table -->
+        <div class="table-container" style="max-height: 500px; overflow-y: auto;">
+            <table class="table is-fullwidth is-hoverable" id="config-table" x-show="!loading">
+                <thead>
+                <tr>
+                    <th>API Key</th>
+                    <th>Account Number</th>
+                    <th>User Name</th>
+                    <th>Elogs URL</th>
+                    <th>Token</th>
+                    <th>Expiration</th>
+                    <th>Created Date Time</th>
+                    <th>Created By</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <template x-for="(config, index) in configs">
+                    <tr>
+                        <td>
+                            <div class="api-key-field">
+                                <span class="truncate" x-text="config.api_key || 'N/A'"></span>
+                                <button class="button is-small is-light copy-button"
+                                        @click="copyToClipboard(config.api_key)"
+                                        x-show="config.api_key"
+                                        aria-label="Copy API Key">
+                                        <span class="icon">
+                                            <i class="far fa-copy"></i>
+                                        </span>
+                                </button>
+                            </div>
+                        </td>
+                        <td x-text="config.account_number"></td>
+                        <td x-text="config.user_name || 'N/A'"></td>
+                        <td x-text="config.url"></td>
+                        <td>
+                            <div class="api-key-field">
+                                <span class="truncate" x-text="config.token || 'N/A'"></span>
+                            </div>
+                        </td>
+                        <td x-text="config.expiration ? formatExpiration(config.expiration) : 'N/A'"></td>
+                        <td x-text="formatDate(config.created_date_time)"></td>
+                        <td x-text="config.created_by || 'System'"></td>
+                        <td>
+                            <button class="button is-danger is-small" @click="deleteUserConfig(index)">
+                                    <span class="icon">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </span>
+                                <span>Delete</span>
+                            </button>
+                        </td>
+                    </tr>
+                </template>
+                <tr x-show="configs.length === 0 && !loading">
+                    <td colspan="9" class="has-text-centered">No configs found. Add one above.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+
+<!-- Alpine.js component -->
+<script>
+    function configApp() {
+        return {
+            configs: [],
+            loading: true,
+            newConfig: {
+                account_number: '',
+                url: '',
+                user_name: '',
+                user_pwd: '',
+            },
+            notifications: [],
+
+            // Show notification message
+            showNotification(message, type = 'success') {
+                const id = Date.now(); // unique ID
+                const note = {id, message, type, show: true};
+
+                this.notifications.push(note);
+
+                // Auto-hide this specific note after 4s
+                setTimeout(() => {
+                    const n = this.notifications.find(n => n.id === id);
+                    if (n) n.show = false;
+                }, 8000);
+            },
+
+            // Format date for display
+            formatDate(dateString) {
+                if (!dateString) return 'N/A';
+                const date = new Date(dateString);
+                // Format with more specific options
+                return date.toLocaleString(undefined, {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+            },
+
+            formatExpiration(epochTime) {
+                if (!epochTime) return 'N/A';
+
+                const date = new Date(epochTime * 1000);
+
+                // Format with more specific options
+                return date.toLocaleString(undefined, {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+            },
+
+            // Copy text to clipboard
+            copyToClipboard(text) {
+                if (!text) return;
+
+                navigator.clipboard.writeText(text)
+                    .then(() => {
+                        this.showNotification('API Key copied to clipboard!');
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy: ', err);
+                        this.showNotification('Failed to copy API Key', 'error');
+                    });
+            },
+
+            isNumber(event) {
+                // Allow only number keys, backspace, and delete
+                const keyCode = event.keyCode || event.which;
+                const keyValue = String.fromCharCode(keyCode);
+                const regex = /^[0-9]+$/;
+
+                if (!regex.test(keyValue)) {
+                    event.preventDefault();
+                    return false;
+                }
+            },
+
+            // Load configs from API
+            loadUserConfigs() {
+                this.loading = true;
+
+                fetch('/config', {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Access-Token': '{{master_api_key}}'
+                    }
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(response => {
+                        // Extract the configs array from the data property
+                        if (response && response.data && Array.isArray(response.data)) {
+                            this.configs = response.data;
+                        } else {
+                            console.error('Unexpected response format:', response);
+                            this.configs = [];
+                        }
+                        this.loading = false;
+                    })
+                    .catch(error => {
+                        console.error('Error loading configs:', error);
+                        this.showNotification('Failed to load configs. Please try again.', 'error');
+                        this.loading = false;
+                    });
+
+            },
+
+            // Add a new config
+            addUserConfig() {
+                // Form validation
+                if (!this.newConfig.account_number || !this.newConfig.url || !this.newConfig.user_name  || !this.newConfig.user_pwd) {
+                    this.showNotification('Please fill in all required fields', 'error');
+                    this.loading = false;
+                    return;
+                }
+
+                // Submit the config data to the API
+                fetch('/config', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Access-Token': '{{master_api_key}}'
+                    },
+                    body: JSON.stringify(this.newConfig)
+                })
+                    .then(response => {
+                        // We still want to parse the JSON even if response is not OK
+                        // So we'll handle the error after parsing
+                        return response.json().then(data => {
+                            // Add the response status to the parsed data for checking
+                            return {...data, httpStatus: response.status};
+                        });
+                    })
+                    .then(data => {
+                        // Check if it's a FastAPI validation error
+                        if (data.detail && Array.isArray(data.detail)) {
+                            const errors = data.detail.map(err => {
+                                // Format the error message nicely
+                                if (err.loc && err.loc.includes('url') && err.msg.includes('URL format')) {
+                                    return `Invalid URL format: ${err.input}. Please include 'http://' or 'https://' prefix.`;
+                                }
+                                return `${err.loc ? err.loc.slice(1).join(' > ') : ''}: ${err.msg}`;
+                            });
+                            throw new Error(errors.join('\n'));
+                        }
+
+                        // Check if it's an error response
+                        if (data.status === "Error" && data.data && data.data.length > 0 && data.data[0].msg) {
+                            throw new Error(`${data.message}. ${data.data[0].msg}`);
+                        }
+
+                        // Success case
+                        this.showNotification('User config successfully added!', 'success');
+
+                        // Reset form
+                        this.newConfig = {
+                            account_number: '',
+                            url: '',
+                            user_name: '',
+                            user_pwd: ''
+                        };
+
+                        // Refresh the config list
+                        this.loadUserConfigs();
+                    })
+                    .catch(error => {
+                        console.error('Error adding config:', error);
+                        this.showNotification(error.message || 'Failed to add config. Please try again.', 'error');
+                        this.loading = false;
+                    });
+            },
+
+            // Delete a config
+            deleteUserConfig(index) {
+                const config = this.configs[index];
+
+                if (confirm(`Are you sure you want to delete config with account number: ${config.account_number}?`)) {
+                    fetch(`/config/${config.api_key}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Access-Token': '{{master_api_key}}'
+                        }
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+
+                            // Remove config from array
+                            this.configs.splice(index, 1);
+                            this.showNotification('User config deleted successfully');
+                        })
+                        .catch(error => {
+                            console.error('Error deleting config:', error);
+                            this.showNotification('Failed to delete config. Please try again.', 'error');
+                        });
+                }
             }
-          });
-          actionCell.appendChild(copyButton);
-          actionCell.appendChild(deleteButton);
-          row.appendChild(actionCell);
-          apiKeyList.appendChild(row);
-        });
-      });
+        };
     }
-
-    function openTab(evt, tabName) {
-      var i, x, tablinks;
-      x = document.getElementsByClassName("content-tab");
-      for (i = 0; i < x.length; i++) {
-        x[i].style.display = "none";
-      }
-      tablinks = document.getElementsByClassName("tab");
-      for (i = 0; i < x.length; i++) {
-        tablinks[i].className = tablinks[i].className.replace(" is-active", "");
-      }
-      document.getElementById(tabName).style.display = "block";
-      evt.currentTarget.className += " is-active";
-    }
-
-    // Initialize table with example data
-    renderApiKeyList();
-  </script>
+</script>
+{% endif %}
 </body>
-
 </html>
