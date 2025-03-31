@@ -16,6 +16,14 @@ THROTTLE_RATE = 100
 THROTTLE_RATE_EXT = 50
 THROTTLE_TIME = 60
 
+AZAD_TENANT_ID = None
+AZAD_CLIENT_ID = None
+AZAD_CLIENT_SECRET = None
+AZAD_REDIRECT_URI = None
+AZAD_AUTH_HOST = None
+AZAD_SESSION_SECRET = None
+HOME_URL = None
+
 # Load the environment variables
 load_dotenv()
 
@@ -47,10 +55,27 @@ ADMIN_PWD = None
 
 if "ADMIN_USER" in os.environ:
     ADMIN_USER = os.environ.get("ADMIN_USER")
-
 if "ADMIN_PWD" in os.environ:
     ADMIN_PWD = os.environ.get("ADMIN_PWD")
 
+if "AZURE_AD_TENANT_ID" in os.environ:
+    AZAD_TENANT_ID = os.environ.get("AZURE_AD_TENANT_ID")
+if "AZURE_AD_CLIENT_ID" in os.environ:
+    AZAD_CLIENT_ID = os.environ.get("AZURE_AD_CLIENT_ID")
+if "AZURE_AD_CLIENT_SECRET" in os.environ:
+    AZAD_CLIENT_SECRET = os.environ.get("AZURE_AD_CLIENT_SECRET")
+if "AZURE_AD_REDIRECT_URI" in os.environ:
+    AZAD_REDIRECT_URI = os.environ.get("AZURE_AD_REDIRECT_URI")
+if "AZURE_AD_AUTH_HOST" in os.environ:
+    AZAD_AUTH_HOST = os.environ.get("AZURE_AD_AUTH_HOST")
+if "SESSION_SECRET" in os.environ:
+    AZAD_SESSION_SECRET = os.environ.get("SESSION_SECRET")
+if "HOME_URL" in os.environ:
+    HOME_URL = os.environ.get("HOME_URL")
+
+AZAD_AUTHORITY = f"{AZAD_AUTH_HOST}/{AZAD_TENANT_ID}"
+AZAD_AUTHORIZE_ENDPOINT = f"{AZAD_AUTHORITY}/oauth2/v2.0/authorize"
+AZAD_TOKEN_ENDPOINT = f"{AZAD_AUTHORITY}/oauth2/v2.0/token"
 
 # -------------------------------------------------
 # API Documentation

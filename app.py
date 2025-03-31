@@ -7,28 +7,26 @@ import secrets
 import traceback
 
 from time import time
-from typing import Annotated, Any
+from typing import Any
 
 
 import requests
 import uvicorn
-from fastapi import Depends, FastAPI, HTTPException, Request, status
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, HTTPException, Request, status
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
-from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.templating import Jinja2Templates
+from starlette.middleware.sessions import SessionMiddleware
 
 from entities.base import Result
-from routers import config_router, elogs_router, login_router
+from routers import config_router, elogs_router, login_router, azure_auth
 
 from libs import config
 from libs.utils import decode, encode
 
-
 app = FastAPI(title="IoFMT ELog Wrapper REST API", version="0.1.0")
-security = HTTPBasic()
 templates = Jinja2Templates(directory="static")
 
 # -------------------------------------------------
@@ -37,11 +35,13 @@ templates = Jinja2Templates(directory="static")
 app.include_router(config_router.router)
 app.include_router(login_router.router)
 app.include_router(elogs_router.router)
+app.include_router(azure_auth.router)
 
 
 # -------------------------------------------------
 # Adding Middlewares
 # -------------------------------------------------
+app.add_middleware(SessionMiddleware, secret_key=config.AZAD_SESSION_SECRET)
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 app.add_middleware(
     CORSMiddleware,
@@ -115,29 +115,6 @@ def custom_openapi():
     app.openapi_schema = openapi_schema
     return app.openapi_schema
 
-
-def get_current_username(
-    credentials: Annotated[HTTPBasicCredentials, Depends(security)],
-):
-    current_username_bytes = credentials.username.encode("utf8")
-    correct_username_bytes = config.ADMIN_USER.encode("utf8")
-    is_correct_username = secrets.compare_digest(
-        current_username_bytes, correct_username_bytes
-    )
-    current_password_bytes = credentials.password.encode("utf8")
-    correct_password_bytes = config.ADMIN_PWD.encode("utf8")
-    is_correct_password = secrets.compare_digest(
-        current_password_bytes, correct_password_bytes
-    )
-    if not (is_correct_username and is_correct_password):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Basic"},
-        )
-    return credentials.username
-
-
 app.openapi = custom_openapi
 
 
@@ -155,15 +132,15 @@ async def get_api_status() -> Any:
 
 @app.get("/admin", tags=["Basic"], response_class=HTMLResponse, include_in_schema=False)
 @rate_limited(config.THROTTLE_RATE, config.THROTTLE_TIME)
-async def admin(
-    request: Request, username: Annotated[str, Depends(get_current_username)]
-) -> Any:
+async def admin(request: Request) -> Any:
+    """Protected admin page."""
+    user = request.session.get("user")
     return templates.TemplateResponse(
         "index.html",
         {
             "request": request,
-            "name": username,
-            "master_api_key": decode(config.GLOBAL_API_KEY),
+            "name": user.get("displayName") if user else None,
+            "master_api_key": decode(config.GLOBAL_API_KEY)
         },
     )
 
