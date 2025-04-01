@@ -14,7 +14,9 @@ jobs:
     - name: 'Checkout GitHub Action' 
       run: |
         echo ${{ secrets.ENV }} | base64 --decode > .env
-    
+    - name: 'Debug .env file'
+      run: cat .env # Print the .env file content
+
     - name: 'Sign in via Azure CLI'
       uses: azure/login@v1
       with:
