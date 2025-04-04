@@ -128,6 +128,12 @@ async def add_config(
         if encode(api_key) != GLOBAL_API_KEY:
             raise Exception("Operation Not allowed.")
 
+        # Trim leading and trailing spaces, then remove trailing slash from URL if present
+        if item.url:
+            item.url = item.url.strip()
+            if item.url.endswith('/'):
+                item.url = item.url.rstrip('/')
+
         cfg = ConfigService(db)
         item.generate_jwt_api_key(JWT_SECRET_KEY)
         cache_key = f"{item.account_number}-{item.user_name}"

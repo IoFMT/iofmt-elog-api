@@ -321,7 +321,15 @@
                                 <span class="truncate" x-text="config.token || 'N/A'"></span>
                             </div>
                         </td>
-                        <td x-text="config.expiration ? formatExpiration(config.expiration) : 'N/A'"></td>
+                        <td>
+                            <span x-text="config.expiration ? formatExpiration(config.expiration) : 'N/A'"
+                                  :class="config.expiration && isExpired(config.expiration) ? 'has-text-danger' : ''">
+                            </span>
+                            <span x-show="config.expiration && isExpired(config.expiration)"
+                                  class="tag is-danger is-light ml-2">
+                                Expired
+                            </span>
+                        </td>
                         <td x-text="formatDate(config.created_date_time)"></td>
                         <td x-text="config.created_by || 'System'"></td>
                         <td>
@@ -426,6 +434,17 @@
                     event.preventDefault();
                     return false;
                 }
+            },
+
+            isExpired(expirationDate) {
+                if (!expirationDate) return false;
+
+                // Parse the expiration date (assuming it's stored in ISO format or similar)
+                const expDate = new Date(expirationDate * 1000);
+                const now = new Date();
+
+                // Compare dates
+                return expDate < now;
             },
 
             // Load configs from API
