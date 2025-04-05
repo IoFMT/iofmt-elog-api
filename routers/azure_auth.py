@@ -6,7 +6,7 @@ from fastapi.responses import RedirectResponse
 
 from libs import config
 
-router = APIRouter()
+router = APIRouter(include_in_schema=False)
 
 
 async def get_user_info(access_token: str):

@@ -37,7 +37,10 @@ async def login(
         data['user_pwd'] = app_cache.get(cache_key)
 
         # Check if password is available in the cache
-        if not data['user_pwd']:
+        if data['user_pwd']:
+            # Refresh the TTL for this cache entry if it exists
+            app_cache[cache_key] = data['user_pwd']
+        else:
             return {
                 "status": "Error",
                 "message": "Authentication Failed",
