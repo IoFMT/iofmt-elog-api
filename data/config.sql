@@ -23,9 +23,10 @@ CREATE TABLE IF NOT EXISTS elogapi.config (
 
 -- Permissions
 
-ALTER TABLE elogapi.config
-    OWNER TO iofmtadm;
+ALTER TABLE elogapi.config OWNER TO iofmtadm;
 GRANT ALL ON TABLE elogapi.config TO iofmtadm;
+
+TRUNCATE TABLE elogapi.config;
 
 ALTER TABLE elogapi.config
     DROP COLUMN IF EXISTS user_pwd,

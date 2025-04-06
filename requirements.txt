@@ -16,3 +16,4 @@ itsdangerous
 aiohttp
 starlette
 pyjwt
+cachetools
