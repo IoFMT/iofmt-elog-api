@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 
-from cachetools import TTLCache
+from diskcache import Cache
 from dotenv import load_dotenv
 
 # Initialize the variables
@@ -90,8 +90,9 @@ AZAD_AUTHORITY = f"{AZAD_AUTH_HOST}/{AZAD_TENANT_ID}"
 AZAD_AUTHORIZE_ENDPOINT = f"{AZAD_AUTHORITY}/oauth2/v2.0/authorize"
 AZAD_TOKEN_ENDPOINT = f"{AZAD_AUTHORITY}/oauth2/v2.0/token"
 
-# Create the application-wide cache instance
-app_cache = TTLCache(maxsize=MEMORY_CACHE_MAX_SIZE, ttl=MEMORY_CACHE_TTL_SECONDS)
+CACHE_DIR = "/app/cache"
+os.makedirs(CACHE_DIR, exist_ok=True)
+app_cache = Cache(directory=CACHE_DIR, timeout=MEMORY_CACHE_TTL_SECONDS)
 
 # -------------------------------------------------
 # API Documentation
