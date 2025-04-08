@@ -18,7 +18,7 @@ class ConfigService:
         stmt = text(config.CACHE_SQL_INSERT_CONFIG)
         stmt = stmt.bindparams(
             p1=data.api_key, p2=data.account_number, p3=data.user_name,
-            p4=data.url, p5=data.created_date_time, p6=data.created_by
+            p4=data.url, p5=data.created_at, p6=data.created_by
         )
         self.db.execute(stmt)
         self.db.commit()
@@ -31,7 +31,7 @@ class ConfigService:
 
     def list_config(self):
         stmt = text("SELECT api_key, account_number, user_id, user_name, url, token, expiration, "
-                    "created_date_time, created_by "
+                    "created_at, created_by "
                     "FROM elogapi.config")
         result = self.db.execute(stmt).fetchall()
 
@@ -46,7 +46,7 @@ class ConfigService:
                     "url": res[4],
                     "token": res[5],
                     "expiration": res[6],
-                    "created_date_time": res[7],
+                    "created_at": res[7],
                     "created_by": res[8],
                 }
             )

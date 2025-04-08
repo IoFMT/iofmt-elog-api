@@ -334,7 +334,7 @@
                             </div>
                         </td>
                         <td>
-                            <span x-text="config.expiration ? formatExpiration(config.expiration) : 'N/A'"
+                            <span x-text="config.expiration ? formatDate(config.expiration) : 'N/A'"
                                   :class="config.expiration && isExpired(config.expiration) ? 'has-text-danger' : ''">
                             </span>
                             <span x-show="config.expiration && isExpired(config.expiration)"
@@ -342,7 +342,7 @@
                                 Expired
                              </span>
                         </td>
-                        <td x-text="formatDate(config.created_date_time)"></td>
+                        <td x-text="formatDate(config.created_at)"></td>
                         <td x-text="config.created_by || 'System'"></td>
                         <td>
                             <button class="button is-danger is-small" @click="deleteUserConfig(index)">
@@ -391,22 +391,7 @@
                 }, 8000);
             },
 
-            // Format date for display
-            formatDate(dateString) {
-                if (!dateString) return 'N/A';
-                const date = new Date(dateString);
-                // Format with more specific options
-                return date.toLocaleString(undefined, {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit'
-                });
-            },
-
-            formatExpiration(epochTime) {
+            formatDate(epochTime) {
                 if (!epochTime) return 'N/A';
 
                 const date = new Date(epochTime * 1000);

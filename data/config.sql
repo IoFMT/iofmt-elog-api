@@ -16,13 +16,11 @@ CREATE TABLE IF NOT EXISTS elogapi.config (
     user_name VARCHAR(100) NOT NULL,
     token TEXT NULL,
     url TEXT NULL,
-    expiration INTEGER NULL,
+    expiration BIGINT NULL,
     other_urls TEXT NULL,
     account_number INTEGER NOT NULL,
-    created_date_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at BIGINT DEFAULT EXTRACT(EPOCH FROM NOW())::BIGINT,
     created_by VARCHAR(255),
-    updated_date_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_by VARCHAR(255),
     CONSTRAINT config_url_username_unique UNIQUE (url, user_name)
 );
 

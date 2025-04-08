@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
+import time
 from datetime import datetime
 from typing import Literal, Optional
 
@@ -42,8 +43,8 @@ class Config(ConfigRefresh):
     expiration: int | None = Field(
         None, title="Expiration", description="The date to token expire"
     )
-    created_date_time: datetime = Field(
-        default_factory=datetime.now,
+    created_at: int = Field(
+        default_factory=lambda: int(time.time()),
         title="Created Date Time",
         description="When this client organization was created"
     )
@@ -88,7 +89,7 @@ class Config(ConfigRefresh):
     def generate_jwt_api_key(self, secret_key: str) -> 'Config':
         """
         Generate a JWT token for this Config instance using the account_number as the key.
-        The payload includes only url, created_date_time, created_by, account_number, user_name,
+        The payload includes only url, created_at, created_by, account_number, user_name,
         and cache_key (<account_number>-<user_name>).
 
         Args:
@@ -103,7 +104,7 @@ class Config(ConfigRefresh):
         # Define payload with only the required fields
         payload = {
             "url": self.url,
-            "created_date_time": self.created_date_time.isoformat(),  # Convert datetime to string
+            "created_at": self.created_at,
             "created_by": self.created_by,
             "account_number": self.account_number,
             "user_name": self.user_name,
