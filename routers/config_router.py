@@ -2,11 +2,11 @@
 
 import traceback
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.orm import Session
 from starlette.requests import Request
 
-from entities.base import Result, Config
+from entities.base import Result, Config, ConfigRefresh
 from libs.config import GLOBAL_API_KEY, JWT_SECRET_KEY, app_cache
 from libs.utils import encode
 from routers import security_router
@@ -45,14 +45,14 @@ async def get_config(
 
 
 @router.get(
-    "/config/token/{id}",
+    "/config/token/{user_id}",
     tags=["Configuration"],
     status_code=status.HTTP_200_OK,
     response_model=Result,
     operation_id="get_token",
 )
 async def get_token(
-        id: str,
+        user_id: int,
         api_key: security_router.APIKey = security_router.Depends(
             security_router.get_api_key
         ),
@@ -63,7 +63,7 @@ async def get_token(
             raise Exception("Operation Not allowed.")
 
         cfg = ConfigService(db)
-        data = cfg.select_token(id)
+        data = cfg.select_token(user_id)
     except Exception as exc:
         print(traceback.format_exc())
         return {
@@ -161,3 +161,50 @@ async def add_config(
         }
 
     return {"status": "OK", "message": "Configuration added.", "data": []}
+
+@router.post(
+    "/config/{user_id}/refresh-credential",
+    tags=["Configuration"],
+    status_code=status.HTTP_200_OK,
+    response_model=Result,
+    operation_id="refresh_config",
+)
+def refresh_credential(
+        user_id: int,
+        item: ConfigRefresh,
+        api_key: security_router.APIKey = security_router.Depends(
+            security_router.get_api_key
+        ),
+        db: Session = Depends(get_db),
+):
+    """
+    Refresh a user's credential (password) in the cache to extend its TTL
+    Provide the user_id, password and api_key in the request body for validation
+    """
+    try:
+        if encode(api_key) != GLOBAL_API_KEY:
+             raise Exception("Operation Not allowed.")
+
+        # Validate the API key exists in the config table
+        cfg = ConfigService(db)
+        result = cfg.exist_config_by_user_id(user_id)
+
+        if result:
+            data = cfg.select_config_by_user_id(user_id)
+            cache_key = f"{data['account_number']}-{data['user_name']}"
+            app_cache[cache_key] = item.user_pwd
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Configuration with user id: '{user_id}' not found"
+            )
+    except Exception as exc:
+        print(traceback.format_exc())
+        error_message = str(exc)
+
+        return {
+            "status": "Error",
+            "message": "Error refreshing Configuration",
+            "data": [{"msg": error_message}],
+        }
+    return {"status": "OK", "message": "Configuration refreshed.", "data": []}

@@ -13,8 +13,13 @@ class Result(BaseModel):
     message: str = Field(title="Message", description="The message of the request")
     data: list[dict] = Field(title="Data", description="The data of the request")
 
+class ConfigRefresh(BaseModel):
+    user_pwd: str = Field(
+        title="User Password",
+        description="The user password of the ELog api user",
+    )
 
-class Config(BaseModel):
+class Config(ConfigRefresh):
     api_key: Optional[str] = Field(
         None,
         title="API Key",
@@ -26,10 +31,6 @@ class Config(BaseModel):
     )
     user_name: str = Field(
         title="User Name", description="The user name of the ELog api user"
-    )
-    user_pwd: str = Field(
-        title="User Password",
-        description="The user password of the ELog api user",
     )
     url: str = Field(
         title="Elogs URL",

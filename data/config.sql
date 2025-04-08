@@ -11,27 +11,20 @@ The 'config' table is designed to store configuration details with the following
 Additionally, the script sets the owner of the 'config' table to 'iofmtadm' and grants all permissions on the table to 'iofmtadm'.
 */
 CREATE TABLE IF NOT EXISTS elogapi.config (
-	api_key varchar(20) NOT NULL,
-	user_name varchar(100) NOT NULL,
-	user_pwd varchar(100) NOT NULL,
-	token text NULL,
-    url text null,
-    expiration integer null,
-    other_urls text null,
-	CONSTRAINT config_pkey PRIMARY KEY (api_key)
+    user_id SERIAL PRIMARY KEY,
+    api_key TEXT UNIQUE NOT NULL,
+    user_name VARCHAR(100) NOT NULL,
+    token TEXT NULL,
+    url TEXT NULL,
+    expiration INTEGER NULL,
+    other_urls TEXT NULL,
+    account_number INTEGER NOT NULL,
+    created_date_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(255),
+    updated_date_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_by VARCHAR(255),
+    CONSTRAINT config_url_username_unique UNIQUE (url, user_name)
 );
-
--- Permissions
 
 ALTER TABLE elogapi.config OWNER TO iofmtadm;
 GRANT ALL ON TABLE elogapi.config TO iofmtadm;
-
-TRUNCATE TABLE elogapi.config;
-
-ALTER TABLE elogapi.config
-    DROP COLUMN IF EXISTS user_pwd,
-    ALTER COLUMN api_key TYPE TEXT,
-    ADD COLUMN account_number    INTEGER NOT NULL,
-    ADD COLUMN created_date_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    ADD COLUMN created_by        VARCHAR(255),
-    ADD CONSTRAINT config_url_username_unique UNIQUE (url, user_name);

@@ -30,7 +30,7 @@ class ConfigService:
         self.db.commit()
 
     def list_config(self):
-        stmt = text("SELECT api_key, account_number, user_name, url, token, expiration, "
+        stmt = text("SELECT api_key, account_number, user_id, user_name, url, token, expiration, "
                     "created_date_time, created_by "
                     "FROM elogapi.config")
         result = self.db.execute(stmt).fetchall()
@@ -41,34 +41,72 @@ class ConfigService:
                 {
                     "api_key": res[0],
                     "account_number": res[1],
-                    "user_name": res[2],
-                    "url": res[3],
-                    "token": res[4],
-                    "expiration": res[5],
-                    "created_date_time": res[6],
-                    "created_by": res[7],
+                    "user_id": res[2],
+                    "user_name": res[3],
+                    "url": res[4],
+                    "token": res[5],
+                    "expiration": res[6],
+                    "created_date_time": res[7],
+                    "created_by": res[8],
                 }
             )
 
         return results
 
-    def select_config(self, api_key):
-        stmt = text("SELECT api_key, user_name, account_number, url FROM elogapi.config where api_key = :p1")
-        stmt = stmt.bindparams(p1=api_key)
-        res = self.db.execute(stmt).fetchall()[0]
+    def select_config_by_user_id(self, user_id: int):
+        stmt = text("SELECT user_id, api_key, user_name, account_number, url FROM elogapi.config where user_id = :p1")
+        stmt = stmt.bindparams(p1=user_id)
+        res = self.db.execute(stmt).fetchone()
 
         results = {
-            "api_key": res[0],
-            "user_name": res[1],
-            "account_number": res[2],
-            "url": res[3],
+            "user_id": res[0],
+            "api_key": res[1],
+            "user_name": res[2],
+            "account_number": res[3],
+            "url": res[4],
         }
 
         return results
 
-    def exist_config(self, api_key):
+    def select_config_by_user_name_api_key(self, user_name: int, api_key: str):
+        stmt = text("SELECT user_id, api_key, user_name, account_number, url FROM elogapi.config where user_name = :p1 and api_key = :p2")
+        stmt = stmt.bindparams(p1=user_name, p2=api_key)
+        res = self.db.execute(stmt).fetchone()
+
+        results = {
+            "user_id": res[0],
+            "api_key": res[1],
+            "user_name": res[2],
+            "account_number": res[3],
+            "url": res[4],
+        }
+
+        return results
+
+    def select_config(self, api_key: str):
+        stmt = text("SELECT user_id, api_key, user_name, account_number, url FROM elogapi.config where api_key = :p1")
+        stmt = stmt.bindparams(p1=api_key)
+        res = self.db.execute(stmt).fetchall()[0]
+
+        results = {
+            "user_id": res[0],
+            "api_key": res[1],
+            "user_name": res[2],
+            "account_number": res[3],
+            "url": res[4],
+        }
+
+        return results
+
+    def exist_config(self, api_key: str):
         stmt = text("SELECT count(1) FROM elogapi.config where api_key = :p1")
         stmt = stmt.bindparams(p1=api_key)
+        result = self.db.execute(stmt).fetchone()
+        return True if result[0] > 0 else False
+
+    def exist_config_by_user_id(self, user_id: int):
+        stmt = text("SELECT count(1) FROM elogapi.config where user_id = :p1")
+        stmt = stmt.bindparams(p1=user_id)
         result = self.db.execute(stmt).fetchone()
         return True if result[0] > 0 else False
 

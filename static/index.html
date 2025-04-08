@@ -91,22 +91,32 @@
         /* Specific column widths */
         #config-table th:nth-child(1),
         #config-table td:nth-child(1) {
-            max-width: 160px; /* API Key */
+            max-width: 150px; /* API Key */
         }
 
         #config-table th:nth-child(2),
         #config-table td:nth-child(2) {
-            max-width: 80px; /* Account Number */
+            max-width: 75px; /* Account Number */
         }
 
         #config-table th:nth-child(3),
         #config-table td:nth-child(3) {
-            max-width: 80px; /* User Name */
+            max-width: 70px; /* User Name */
         }
 
-        #config-table th:nth-child(5),
-        #config-table td:nth-child(5) {
-            max-width: 120px; /* Token */
+        #config-table th:nth-child(6),
+        #config-table td:nth-child(6) {
+            max-width: 110px; /* Token */
+        }
+
+        #config-table th:nth-child(7),
+        #config-table td:nth-child(7) {
+            max-width: 140px; /* Expiration */
+        }
+
+        #config-table th:nth-child(9),
+        #config-table td:nth-child(9) {
+            max-width: 180px; /* Created Date Time */
         }
 
         /* Improve truncate class */
@@ -288,6 +298,7 @@
                 <tr>
                     <th>API Key</th>
                     <th>Account Number</th>
+                    <th>User ID</th>
                     <th>User Name</th>
                     <th>Elogs URL</th>
                     <th>Token</th>
@@ -307,13 +318,14 @@
                                         @click="copyToClipboard(config.api_key)"
                                         x-show="config.api_key"
                                         aria-label="Copy API Key">
-                                        <span class="icon">
-                                            <i class="far fa-copy"></i>
-                                        </span>
+                                <span class="icon">
+                                    <i class="far fa-copy"></i>
+                                </span>
                                 </button>
                             </div>
                         </td>
                         <td x-text="config.account_number"></td>
+                        <td x-text="config.user_id || 'N/A'"></td>
                         <td x-text="config.user_name || 'N/A'"></td>
                         <td x-text="config.url"></td>
                         <td>
@@ -328,22 +340,22 @@
                             <span x-show="config.expiration && isExpired(config.expiration)"
                                   class="tag is-danger is-light ml-2">
                                 Expired
-                            </span>
+                             </span>
                         </td>
                         <td x-text="formatDate(config.created_date_time)"></td>
                         <td x-text="config.created_by || 'System'"></td>
                         <td>
                             <button class="button is-danger is-small" @click="deleteUserConfig(index)">
-                                    <span class="icon">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </span>
+                            <span class="icon">
+                                <i class="fas fa-trash-alt"></i>
+                            </span>
                                 <span>Delete</span>
                             </button>
                         </td>
                     </tr>
                 </template>
                 <tr x-show="configs.length === 0 && !loading">
-                    <td colspan="9" class="has-text-centered">No configs found. Add one above.</td>
+                    <td colspan="10" class="has-text-centered">No configs found. Add one above.</td>
                 </tr>
                 </tbody>
             </table>
