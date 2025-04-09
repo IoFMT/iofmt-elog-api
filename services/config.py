@@ -110,6 +110,33 @@ class ConfigService:
         result = self.db.execute(stmt).fetchone()
         return True if result[0] > 0 else False
 
+    def select_token_by_user_id(self, user_id):
+        stmt = text(
+            "SELECT url, token, expiration, other_urls FROM elogapi.config where user_id = :p1"
+        )
+        stmt = stmt.bindparams(p1=user_id)
+        result = self.db.execute(stmt).fetchone()
+
+        if not result:
+            return None
+
+        # Handle NULL other_urls by defaulting to empty list/dict
+        other_urls = result[3]
+        parsed_other_urls = json.loads(other_urls) if other_urls is not None else []
+
+        response = {
+            "url": result[0],
+            "token": result[1],
+            "expiration": result[2],
+            "other_urls": parsed_other_urls,
+        }
+
+        # Check if token is null and raise an exception if it is
+        if response["token"] is None:
+            raise Exception("Token is null or not available")
+
+        return response
+
     def select_token(self, api_key):
         stmt = text(
             "SELECT url, token, expiration, other_urls FROM elogapi.config where api_key = :p1"

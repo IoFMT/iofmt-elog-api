@@ -63,7 +63,7 @@ async def get_token(
             raise Exception("Operation Not allowed.")
 
         cfg = ConfigService(db)
-        data = cfg.select_token(user_id)
+        data = cfg.select_token_by_user_id(user_id)
     except Exception as exc:
         print(traceback.format_exc())
         return {

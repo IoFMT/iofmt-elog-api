@@ -256,7 +256,7 @@ async def commence_job(
         data = cfg.select_token(api_key)
         elog = ElogsService(db)
         user_data = elog.commence_job(
-            data["token"], data["url"], site_id, job_id, job_data
+            data["token"], data["url"], site_id, job_id, job_data.model_dump_json()
         )
         return {"status": "OK", "message": "Job commenced.", "data": [user_data]}
     except Exception as exc:
