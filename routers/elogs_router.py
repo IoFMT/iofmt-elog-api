@@ -292,7 +292,7 @@ async def complete_job(
             data["url"],
             site_id,
             job_id,
-            job_data,
+            job_data.model_dump_json(),
         )
         return {"status": "OK", "message": "Job completed.", "data": [user_data]}
     except Exception as exc:
