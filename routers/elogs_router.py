@@ -272,7 +272,7 @@ async def commence_job(
     tags=["ELogs"],
     status_code=status.HTTP_200_OK,
     response_model=Result,
-    operation_id="complete_paperwork_job",
+    operation_id="complete_job",
 )
 async def complete_job(
     site_id: int,
@@ -307,7 +307,7 @@ async def complete_job(
     tags=["ELogs"],
     status_code=status.HTTP_200_OK,
     response_model=Result,
-    operation_id="complete_job",
+    operation_id="complete_paperwork_job",
 )
 async def complete_paperwork_job(
     site_id: int,
