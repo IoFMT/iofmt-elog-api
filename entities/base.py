@@ -154,6 +154,8 @@ class SiteContact(BaseModel):
     notifyOnComplete: bool
     declineEmail: bool
 
+class JobCompletion(BaseModel):
+    completionDate: Optional[str] = None
 
 class JobData(BaseModel):
     _links: Optional[_Links] = None

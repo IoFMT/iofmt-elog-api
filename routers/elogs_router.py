@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, s
 from sqlalchemy.orm import Session
 
 from routers import security_router
-from entities.base import ImageData, JobData, Result, JobsBy
+from entities.base import ImageData, JobData, Result, JobsBy, JobCompletion
 from services.database import get_db
 from services.config import ConfigService
 from services.elogs import ElogsService
@@ -277,7 +277,7 @@ async def commence_job(
 async def complete_job(
     site_id: int,
     job_id: int,
-    job_data: JobData,
+    job_data: JobCompletion,
     api_key: security_router.APIKey = security_router.Depends(
         security_router.get_api_key
     ),
@@ -312,7 +312,7 @@ async def complete_job(
 async def complete_paperwork_job(
     site_id: int,
     job_id: int,
-    job_data: JobData,
+    job_data: JobCompletion,
     api_key: security_router.APIKey = security_router.Depends(
         security_router.get_api_key
     ),
