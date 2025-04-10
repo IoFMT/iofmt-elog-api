@@ -328,7 +328,7 @@ async def complete_paperwork_job(
             data["url"],
             site_id,
             job_id,
-            job_data,
+            job_data.model_dump_json(),
         )
         return {"status": "OK", "message": "Paperwork completed.", "data": [user_data]}
     except Exception as exc:
