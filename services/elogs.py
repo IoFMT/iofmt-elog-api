@@ -214,7 +214,7 @@ class ElogsService:
             final_url = f"{base_url}/sites/{site_id}/jobs/{job_id}/workflow/operation/complete-paperwork"
             payload = job_data
             response = requests.request(
-                "POST", final_url, headers=headers, json=payload
+                "POST", final_url, headers=headers, data=payload
             )
 
             if response.status_code < 300:
