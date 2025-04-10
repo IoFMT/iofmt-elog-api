@@ -296,11 +296,10 @@ async def complete_job(
         )
         return {"status": "OK", "message": "Job completed.", "data": [user_data]}
     except Exception as exc:
-        return {
-            "status": "Error",
-            "message": "Error Completing Job",
-            "data": [{"msg": str(exc)}],
-        }
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={"status": "Error", "message": "Error Completing Job", "data": [{"msg": str(exc)}]}
+        )
 
 
 @router.post(
@@ -332,11 +331,10 @@ async def complete_paperwork_job(
         )
         return {"status": "OK", "message": "Paperwork completed.", "data": [user_data]}
     except Exception as exc:
-        return {
-            "status": "Error",
-            "message": "Error Completing Paperwork",
-            "data": [{"msg": str(exc)}],
-        }
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={"status": "Error", "message": "Error Completing Paperwork", "data": [{"msg": str(exc)}]}
+        )
 
 
 @router.post(
