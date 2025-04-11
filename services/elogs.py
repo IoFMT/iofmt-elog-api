@@ -316,9 +316,9 @@ class ElogsService:
                 "Authorization": "Bearer " + token,
             }
             final_url = f"{base_url}/files"
-            payload = file_data
+            payload = json.dumps(file_data)
             response = requests.request(
-                "POST", final_url, headers=headers, json=payload
+                "POST", final_url, headers=headers, data=payload
             )
             if response.status_code < 300:
                 return json.loads(response.text)
