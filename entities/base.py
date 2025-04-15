@@ -156,6 +156,7 @@ class SiteContact(BaseModel):
 
 class JobCompletion(BaseModel):
     completionDate: Optional[str] = None
+    note: Optional[str] = None
 
 class JobData(BaseModel):
     _links: Optional[_Links] = None
