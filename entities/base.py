@@ -175,7 +175,7 @@ class JobData(BaseModel):
     files: Optional[list[str]] = None
 
 
-class ImageData(BaseModel):
+class GoogleBucketData(BaseModel):
     key: str
     bucket: str
     google_access_id: str

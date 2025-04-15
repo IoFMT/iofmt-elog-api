@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, s
 from sqlalchemy.orm import Session
 
 from routers import security_router
-from entities.base import ImageData, JobData, Result, JobsBy, JobCompletion
+from entities.base import GoogleBucketData, JobData, Result, JobsBy, JobCompletion
 from services.database import get_db
 from services.config import ConfigService
 from services.elogs import ElogsService
@@ -537,7 +537,6 @@ async def get_file_data(
 async def upload_file(
     key: str = Form(...),
     bucket: str = Form(...),
-    construct: str = Form(...),
     google_access_id: str = Form(...),
     content_disposition: str = Form(...),
     policy: str = Form(...),
@@ -550,13 +549,13 @@ async def upload_file(
     db: Session = Depends(get_db),
 ):
     try:
-        with open(file_data.filename, "wb") as f:
-            f.write(file_data.file.read())
+        # Read the file content once
+        file_content = await file_data.read()
 
         cfg = ConfigService(db)
         data = cfg.select_token(api_key)
         elog = ElogsService(db)
-        image_data = ImageData(
+        google_bucket_data = GoogleBucketData(
             key=key,
             bucket=bucket,
             google_access_id=google_access_id,
@@ -565,8 +564,11 @@ async def upload_file(
             content_disposition=content_disposition,
             success_action_redirect=success_action_redirect,
         )
+
         user_data = elog.upload_file(
-            data["token"], image_data, file_data.filename, file_data.content_type
+            data["token"], google_bucket_data,
+            file_data.filename, file_data.content_type,
+            file_content
         )
         return {"status": "OK", "message": "File uploaded.", "data": [user_data]}
     except Exception as exc:

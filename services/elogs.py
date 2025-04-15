@@ -328,29 +328,34 @@ class ElogsService:
                 f"Error Accessing ELog API - Not able to get file data\n Explanation:{exc}"
             )
 
-    def upload_file(self, token, image_data, file_name, file_type):
+    def upload_file(self, token, google_bucket_data, file_name, file_type, file_content):
         try:
-            url = "https://storage.googleapis.com/apidocs1-elogbooks-staging"
+            url = f"https://storage.googleapis.com/{google_bucket_data.bucket}"
 
             payload = {
-                "signature": image_data.signature,
-                "Content-Disposition": image_data.content_disposition,
-                "policy": image_data.policy,
-                "success_action_redirect": image_data.success_action_redirect,
-                "key": image_data.key,
-                "GoogleAccessId": image_data.google_access_id,
-                "bucket": image_data.bucket,
+                "signature": google_bucket_data.signature,
+                "Content-Disposition": google_bucket_data.content_disposition,
+                "policy": google_bucket_data.policy,
+                "success_action_redirect": google_bucket_data.success_action_redirect,
+                "key": google_bucket_data.key,
+                "GoogleAccessId": google_bucket_data.google_access_id,
+                "bucket": google_bucket_data.bucket,
             }
 
-            files = [("file", (file_name, open(file_name, "rb"), file_type))]
+            # Properly format the files parameter
+            files = {
+                "file": (file_name, file_content, file_type)
+            }
 
             headers = {
-                "content-type": "multipart/form-data",
                 "Authorization": "Bearer " + token,
             }
 
-            response = requests.request(
-                "POST", url, headers=headers, data=payload, files=files
+            response = requests.post(
+                url,
+                headers=headers,
+                data=payload,
+                files=files
             )
 
             print(response.text)
