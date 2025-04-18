@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import time
 from datetime import datetime
-from typing import Literal, Optional, Dict
+from typing import Literal, Optional, Dict, Any
 
 import jwt
 from pydantic import BaseModel, Field, field_validator
@@ -174,12 +174,12 @@ class CreateJobRequest(BaseModel):
     summary: str
     description: str
     siteContactAvailableOnSite: bool
-    keyholder: Keyholder
+    keyholder: Optional[Keyholder]
     siteContactSameAsReporter: bool
     notifyOnCreate: bool
     notifyOnComplete: bool
     noRequisiteRequired: bool
-    links: Dict[str, Dict[str, str]] = Field(alias="_links")
+    links: Dict[str, Any] = Field(alias="_links")
 
     class Config:
         # Allow arbitrary field names including those with underscore

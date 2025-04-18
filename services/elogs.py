@@ -232,9 +232,8 @@ class ElogsService:
                 "Authorization": "Bearer " + token,
             }
             final_url = f"{base_url}/sites/{site_id}/jobs/reactive"
-            payload = job_data
             response = requests.request(
-                "POST", final_url, headers=headers, data=payload
+                "POST", final_url, headers=headers, data=job_data
             )
             if response.status_code < 300:
                 return {
