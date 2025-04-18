@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import time
 from datetime import datetime
-from typing import Literal, Optional
+from typing import Literal, Optional, Dict
 
 import jwt
 from pydantic import BaseModel, Field, field_validator
@@ -154,9 +154,36 @@ class SiteContact(BaseModel):
     notifyOnComplete: bool
     declineEmail: bool
 
+
+class Keyholder(BaseModel):
+    name: str
+    email: str
+    phone: str
+
+
 class JobCompletion(BaseModel):
     completionDate: Optional[str] = None
     note: Optional[str] = None
+
+
+class CreateJobRequest(BaseModel):
+    """
+    Model for job creation payload that properly handles the _links field with
+    underscore using alias
+    """
+    summary: str
+    description: str
+    siteContactAvailableOnSite: bool
+    keyholder: Keyholder
+    siteContactSameAsReporter: bool
+    notifyOnCreate: bool
+    notifyOnComplete: bool
+    noRequisiteRequired: bool
+    links: Dict[str, Dict[str, str]] = Field(alias="_links")
+
+    class Config:
+        # Allow arbitrary field names including those with underscore
+        populate_by_name = True
 
 class JobData(BaseModel):
     _links: Optional[_Links] = None

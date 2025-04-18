@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
+import json
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
 
 from routers import security_router
-from entities.base import GoogleBucketData, JobData, Result, JobsBy, JobCompletion
+from entities.base import GoogleBucketData, JobData, Result, JobsBy, JobCompletion, CreateJobRequest
 from services.database import get_db
 from services.config import ConfigService
 from services.elogs import ElogsService
@@ -346,7 +347,7 @@ async def complete_paperwork_job(
 )
 async def create_job(
     site_id: int,
-    job_data: JobData,
+    job_data: CreateJobRequest,
     api_key: security_router.APIKey = security_router.Depends(
         security_router.get_api_key
     ),
@@ -356,7 +357,9 @@ async def create_job(
         cfg = ConfigService(db)
         data = cfg.select_token(api_key)
         elog = ElogsService(db)
-        user_data = elog.create_job(data["token"], data["url"], site_id, job_data)
+        # Preserve the _links structure with underscore during serialization
+        json_data = job_data.model_dump(by_alias=True)
+        user_data = elog.create_job(data["token"], data["url"], site_id, json.dumps(json_data))
         return {"status": "OK", "message": "Job created.", "data": [user_data]}
     except Exception as exc:
         return {
