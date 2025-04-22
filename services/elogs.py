@@ -362,3 +362,21 @@ class ElogsService:
         except:
             print(traceback.format_exc())
         return {"status": "OK"}
+        
+    def send_message(self, token, base_url, site_id, job_id, message_data):
+        try:
+            headers = {
+                "Content-Type": "application/json;charset=UTF-8",
+                "Authorization": "Bearer " + token,
+            }
+            final_url = f"{base_url}/sites/{site_id}/jobs/{job_id}/messages"
+            response = requests.request(
+                "POST", final_url, headers=headers, data=message_data
+            )
+            if response.status_code < 300:
+                return {"status": response.text}
+            raise Exception(f"\n url: {final_url} \n response: {response.text}")
+        except Exception as exc:
+            raise Exception(
+                f"Error Accessing ELog API - Not able to send message\n Explanation:{exc}"
+            )

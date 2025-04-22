@@ -203,6 +203,20 @@ class JobData(BaseModel):
     files: Optional[list[str]] = None
 
 
+class UpdateRecipient(BaseModel):
+    name: Optional[str]
+    email: Optional[str]
+    shared: Optional[bool] = False
+    type: Optional[str]
+
+
+class MessageData(BaseModel):
+    body: str
+    direction: str
+    visibility: str
+    updateRecipients: Optional[list[UpdateRecipient]] = None
+
+
 class GoogleBucketData(BaseModel):
     key: str
     bucket: str
