@@ -216,6 +216,47 @@ class MessageData(BaseModel):
     visibility: str
     updateRecipients: Optional[list[UpdateRecipient]] = None
 
+class FileLink(BaseModel):
+    href: str
+
+
+class DocumentTypeLink(BaseModel):
+    href: str
+
+
+class FileLinks(BaseModel):
+    file: FileLink
+    documentType: Optional[DocumentTypeLink] = None
+
+
+class Tags(BaseModel):
+    tags: list = Field(default_factory=list)
+
+
+class JobFileData(BaseModel):
+    """
+    Model for adding files to jobs that properly handles the _links field with
+    underscore using alias
+    """
+    links: Dict[str, Any] = Field(alias="_links")
+    tags: Tags
+    id: Optional[str] = None
+    title: str
+    visibility: str
+    isContract: Optional[bool] = None
+    documentDate: Optional[str] = None
+    expiresAt: Optional[str] = None
+    isStatutory: bool = False
+    userTags: Optional[list] = Field(default_factory=list)
+    notifyExpiry: bool = False
+    isJobFile: bool = False
+    description: Optional[str] = None
+    applicableTo: list = Field(default_factory=list)
+
+    class Config:
+        # Allow arbitrary field names including those with underscore
+        populate_by_name = True
+
 
 class GoogleBucketData(BaseModel):
     key: str

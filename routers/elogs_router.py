@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, s
 from sqlalchemy.orm import Session
 
 from routers import security_router
-from entities.base import GoogleBucketData, JobData, Result, JobsBy, JobCompletion, CreateJobRequest, MessageData
+from entities.base import GoogleBucketData, JobData, Result, JobsBy, JobCompletion, CreateJobRequest, MessageData, JobFileData
 from services.database import get_db
 from services.config import ConfigService
 from services.elogs import ElogsService
@@ -225,7 +225,7 @@ async def acknowledge_job(
         data = cfg.select_token(api_key)
         elog = ElogsService(db)
         user_data = elog.acknowledge_job(
-            data["token"], data["url"], site_id, job_id, job_data
+            data["token"], data["url"], site_id, job_id, job_data.model_dump_json()
         )
         return {"status": "OK", "message": "Job acknowledged.", "data": [user_data]}
     except Exception as exc:
@@ -432,6 +432,68 @@ async def reject_job(
             "data": [{"msg": str(exc)}],
         }
 
+@router.post(
+    "/jobs/update",
+    tags=["ELogs"],
+    status_code=status.HTTP_200_OK,
+    response_model=Result,
+    operation_id="update_job",
+)
+async def send_job_message(
+    site_id: int,
+    job_id: int,
+    message_data: MessageData,
+    api_key: security_router.APIKey = security_router.Depends(
+        security_router.get_api_key
+    ),
+    db: Session = Depends(get_db),
+):
+    try:
+        cfg = ConfigService(db)
+        data = cfg.select_token(api_key)
+        elog = ElogsService(db)
+        user_data = elog.send_message(
+            data["token"], data["url"], site_id, job_id, message_data.model_dump_json()
+        )
+        return {"status": "OK", "message": "Update sent successfully.", "data": [user_data]}
+    except Exception as exc:
+        return {
+            "status": "Error",
+            "message": "Error sending message",
+            "data": [{"msg": str(exc)}],
+        }
+
+@router.post(
+    "/jobs/files",
+    tags=["ELogs"],
+    status_code=status.HTTP_200_OK,
+    response_model=Result,
+    operation_id="add_job_file",
+)
+async def add_job_file(
+    site_id: int,
+    job_id: int,
+    file_data: JobFileData,
+    api_key: security_router.APIKey = security_router.Depends(
+        security_router.get_api_key
+    ),
+    db: Session = Depends(get_db),
+):
+    try:
+        cfg = ConfigService(db)
+        data = cfg.select_token(api_key)
+        elog = ElogsService(db)
+        json_data = file_data.model_dump(by_alias=True)
+        user_data = elog.add_job_file(
+            data["token"], data["url"], site_id, job_id, json.dumps(json_data)
+        )
+        return {"status": "OK", "message": "File added to job successfully.", "data": [user_data]}
+    except Exception as exc:
+        return {
+            "status": "Error",
+            "message": "Error adding file to job",
+            "data": [{"msg": str(exc)}],
+        }
 
 @router.post(
     "/jobs/extension/request",
@@ -578,36 +640,5 @@ async def upload_file(
         return {
             "status": "Error",
             "message": "Error Uploading File",
-            "data": [{"msg": str(exc)}],
-        }
-
-@router.post(
-    "/jobs/update",
-    tags=["ELogs"],
-    status_code=status.HTTP_200_OK,
-    response_model=Result,
-    operation_id="update_job",
-)
-async def send_job_message(
-    site_id: int,
-    job_id: int,
-    message_data: MessageData,
-    api_key: security_router.APIKey = security_router.Depends(
-        security_router.get_api_key
-    ),
-    db: Session = Depends(get_db),
-):
-    try:
-        cfg = ConfigService(db)
-        data = cfg.select_token(api_key)
-        elog = ElogsService(db)
-        user_data = elog.send_message(
-            data["token"], data["url"], site_id, job_id, message_data.model_dump_json()
-        )
-        return {"status": "OK", "message": "Update sent successfully.", "data": [user_data]}
-    except Exception as exc:
-        return {
-            "status": "Error",
-            "message": "Error sending message",
             "data": [{"msg": str(exc)}],
         }
