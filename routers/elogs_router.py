@@ -390,7 +390,7 @@ async def approve_job(
         data = cfg.select_token(api_key)
         elog = ElogsService(db)
         user_data = elog.approve_job(
-            data["token"], data["url"], site_id, job_id, "accept", job_data
+            data["token"], data["url"], site_id, job_id, "accept", job_data.model_dump_json()
         )
         return {"status": "OK", "message": "Job Approved.", "data": [user_data]}
     except Exception as exc:
