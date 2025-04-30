@@ -139,7 +139,10 @@ async def add_config(
         cache_key = f"{item.account_number}-{item.user_name}"
         app_cache[cache_key] = item.user_pwd
         user = request.session.get("user")
-        item.created_by = user.get('userPrincipalName')
+        if user:
+            item.created_by = user.get('userPrincipalName')
+        else:
+            item.created_by = "SYSTEM"
         cfg.add_config(item)
     except Exception as exc:
         print(traceback.format_exc())
