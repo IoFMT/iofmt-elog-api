@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import jwt
 from fastapi import Depends, HTTPException, Security
-from fastapi.security.api_key import APIKeyCookie, APIKeyHeader, APIKeyQuery
+from fastapi.security.api_key import APIKey, APIKeyCookie, APIKeyHeader, APIKeyQuery
 from starlette.status import HTTP_403_FORBIDDEN
 
 
