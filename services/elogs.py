@@ -4,13 +4,6 @@ import json
 import traceback
 import requests
 
-from sqlalchemy import text
-
-
-from libs import config
-from entities.base import Config
-
-
 class ElogsService:
     db = None
 

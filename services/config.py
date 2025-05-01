@@ -15,6 +15,7 @@ class ConfigService:
         self.db = db
 
     def add_config(self, data: Config):
+        # Insert the config
         stmt = text(config.CACHE_SQL_INSERT_CONFIG)
         stmt = stmt.bindparams(
             p1=data.api_key, p2=data.account_number, p3=data.user_name,
@@ -23,9 +24,15 @@ class ConfigService:
         self.db.execute(stmt)
         self.db.commit()
 
-    def delete_config(self, api_key):
+        # Get the inserted user_id
+        stmt = text("SELECT user_id FROM elogapi.config WHERE api_key = :p1")
+        stmt = stmt.bindparams(p1=data.api_key)
+        result = self.db.execute(stmt).fetchone()
+        return result[0] if result else None
+
+    def delete_config(self, user_id):
         stmt = text(config.CACHE_SQL_DELETE_CONFIG)
-        stmt = stmt.bindparams(p1=api_key)
+        stmt = stmt.bindparams(p1=user_id)
         self.db.execute(stmt)
         self.db.commit()
 

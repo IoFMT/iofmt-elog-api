@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.orm import Session
 from starlette.requests import Request
 
-from entities.base import Result, Config, ConfigRefresh
+from entities.base import Result, Config, ConfigRefresh, ConfigCreate
 from libs.config import GLOBAL_API_KEY, JWT_SECRET_KEY, app_cache
 from libs.utils import encode
 from routers import security_router
@@ -86,7 +86,7 @@ async def get_token(
     operation_id="delete_config",
 )
 async def delete_config(
-        id: str,
+        id: int,
         api_key: security_router.APIKey = security_router.Depends(
             security_router.get_api_key
         ),
@@ -106,7 +106,7 @@ async def delete_config(
             "message": "Error deleting Configuration",
             "data": [{"msg": str(exc)}],
         }
-    return {"status": "OK", "message": "Configuration deleted.", "data": [{"id": id}]}
+    return {"status": "OK", "message": "Configuration deleted.", "data": [{"user_id": id}]}
 
 
 @router.post(
@@ -118,7 +118,7 @@ async def delete_config(
 )
 async def add_config(
         request: Request,
-        item: Config,
+        item: ConfigCreate,
         api_key: security_router.APIKey = security_router.Depends(
             security_router.get_api_key
         ),
@@ -134,16 +134,36 @@ async def add_config(
             if item.url.endswith('/'):
                 item.url = item.url.rstrip('/')
 
+        # Convert ConfigCreate to Config model
+        config_obj = Config(
+            account_number=item.account_number,
+            user_name=item.user_name,
+            url=item.url,
+            user_pwd=item.user_pwd
+        )
+
         cfg = ConfigService(db)
-        item.generate_jwt_api_key(JWT_SECRET_KEY)
-        cache_key = f"{item.account_number}-{item.user_name}"
-        app_cache[cache_key] = item.user_pwd
+        config_obj.generate_jwt_api_key(JWT_SECRET_KEY)
+        cache_key = f"{config_obj.account_number}-{config_obj.user_name}"
+        app_cache[cache_key] = config_obj.user_pwd
         user = request.session.get("user")
         if user:
-            item.created_by = user.get('userPrincipalName')
+            config_obj.created_by = user.get('userPrincipalName')
         else:
-            item.created_by = "SYSTEM"
-        cfg.add_config(item)
+            config_obj.created_by = "SYSTEM"
+
+        # Get the user_id from the database after adding the config
+        user_id = cfg.add_config(config_obj)
+
+        # Return specific fields in response data
+        response_data = {
+            "api_key": config_obj.api_key,
+            "account_number": config_obj.account_number,
+            "user_id": user_id,
+            "user_name": config_obj.user_name,
+            "url": config_obj.url
+        }
+
     except Exception as exc:
         print(traceback.format_exc())
         error_message = str(exc)
@@ -163,7 +183,7 @@ async def add_config(
             "data": [{"msg": error_message}],
         }
 
-    return {"status": "OK", "message": "Configuration added.", "data": []}
+    return {"status": "OK", "message": "Configuration added.", "data": [response_data]}
 
 @router.post(
     "/config/{user_id}/refresh-credential",

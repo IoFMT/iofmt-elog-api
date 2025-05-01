@@ -20,6 +20,34 @@ class ConfigRefresh(BaseModel):
         description="The user password of the ELog api user",
     )
 
+class ConfigCreate(BaseModel):
+    account_number: int = Field(
+        title="Account Number",
+        description="Numeric unique identifier for client organization"
+    )
+    user_name: str = Field(
+        title="User Name", description="The user name of the ELog api user"
+    )
+    url: str = Field(
+        title="Elogs URL",
+        description="The url of the ELog api user"
+    )
+    user_pwd: str = Field(
+        title="User Password",
+        description="The user password of the ELog api user",
+    )
+
+    @field_validator('url')
+    def validate_url(cls, v):
+        try:
+            from urllib.parse import urlparse
+            result = urlparse(v)
+            if all([result.scheme, result.netloc]):
+                return v
+            raise ValueError("Invalid URL format")
+        except Exception:
+            raise ValueError("Invalid URL format")
+
 class Config(ConfigRefresh):
     api_key: Optional[str] = Field(
         None,

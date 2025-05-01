@@ -10,6 +10,8 @@ The 'config' table is designed to store configuration details with the following
 
 Additionally, the script sets the owner of the 'config' table to 'iofmtadm' and grants all permissions on the table to 'iofmtadm'.
 */
+CREATE SCHEMA elogapi;
+
 CREATE TABLE IF NOT EXISTS elogapi.config (
     user_id SERIAL PRIMARY KEY,
     api_key TEXT UNIQUE NOT NULL,

@@ -55,7 +55,7 @@ CACHE_SQL_INSERT_CONFIG = """INSERT INTO elogapi.config
                           (api_key, account_number, user_name, url, created_at, created_by)
                           VALUES (:p1, :p2, :p3, :p4, :p5, :p6)"""
 
-CACHE_SQL_DELETE_CONFIG = """DELETE FROM elogapi.config WHERE api_key = :p1"""
+CACHE_SQL_DELETE_CONFIG = """DELETE FROM elogapi.config WHERE user_id = :p1"""
 
 ADMIN_USER = None
 ADMIN_PWD = None

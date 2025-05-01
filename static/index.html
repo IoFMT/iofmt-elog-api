@@ -547,8 +547,8 @@
             deleteUserConfig(index) {
                 const config = this.configs[index];
 
-                if (confirm(`Are you sure you want to delete config with account number: ${config.account_number}?`)) {
-                    fetch(`/config/${config.api_key}`, {
+                if (confirm(`Are you sure you want to delete config with account number: ${config.user_id}?`)) {
+                    fetch(`/config/${config.user_id}`, {
                         method: 'DELETE',
                         headers: {
                             'Content-Type': 'application/json',
