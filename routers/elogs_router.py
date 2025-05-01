@@ -4,6 +4,7 @@ import json
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
 
+from libs.utils import require_admin_api_key, validate_user_api_key
 from routers import security_router
 from entities.base import GoogleBucketData, JobData, Result, JobsBy, JobCompletion, CreateJobRequest, MessageData, JobFileData
 from services.database import get_db
@@ -20,15 +21,19 @@ router = APIRouter()
     response_model=Result,
     operation_id="get_user",
 )
+@require_admin_api_key
 async def get_user(
+    user_api_key: str,
     api_key: security_router.APIKey = security_router.Depends(
         security_router.get_api_key
     ),
     db: Session = Depends(get_db),
 ):
     try:
+        validate_user_api_key(user_api_key)
+        
         cfg = ConfigService(db)
-        data = cfg.select_token(api_key)
+        data = cfg.select_token(user_api_key)
         elog = ElogsService(db)
         user_data = elog.get_user(
             data["token"], data["url"], data["other_urls"]["_links"]["user"]["href"]
@@ -49,7 +54,9 @@ async def get_user(
     response_model=Result,
     operation_id="get_sites",
 )
+@require_admin_api_key
 async def get_sites(
+    user_api_key: str,
     site_name: str | None = None,
     page: int = 1,
     api_key: security_router.APIKey = security_router.Depends(
@@ -58,8 +65,10 @@ async def get_sites(
     db: Session = Depends(get_db),
 ):
     try:
+        validate_user_api_key(user_api_key)
+        
         cfg = ConfigService(db)
-        data = cfg.select_token(api_key)
+        data = cfg.select_token(user_api_key)
         elog = ElogsService(db)
         user_data = elog.get_sites(
             data["token"],
@@ -85,7 +94,9 @@ async def get_sites(
     response_model=Result,
     operation_id="get_locations",
 )
+@require_admin_api_key
 async def get_locations(
+    user_api_key: str,
     site_id: int,
     page: int = 1,
     api_key: security_router.APIKey = security_router.Depends(
@@ -94,8 +105,10 @@ async def get_locations(
     db: Session = Depends(get_db),
 ):
     try:
+        validate_user_api_key(user_api_key)
+        
         cfg = ConfigService(db)
-        data = cfg.select_token(api_key)
+        data = cfg.select_token(user_api_key)
         elog = ElogsService(db)
         user_data = elog.get_locations(data["token"], data["url"], site_id, page)
         return {"status": "OK", "message": "Locations found.", "data": [user_data]}
@@ -114,7 +127,9 @@ async def get_locations(
     response_model=Result,
     operation_id="get_tasks",
 )
+@require_admin_api_key
 async def get_tasks(
+    user_api_key: str,
     site_id: int,
     task_id: int | None = None,
     page: int = 1,
@@ -124,8 +139,10 @@ async def get_tasks(
     db: Session = Depends(get_db),
 ):
     try:
+        validate_user_api_key(user_api_key)
+        
         cfg = ConfigService(db)
-        data = cfg.select_token(api_key)
+        data = cfg.select_token(user_api_key)
         elog = ElogsService(db)
         if task_id:
             user_data = elog.get_task(data["token"], data["url"], site_id, task_id)
@@ -148,16 +165,20 @@ async def get_tasks(
     response_model=Result,
     operation_id="get_jobs_by",
 )
+@require_admin_api_key
 async def get_jobs_by(
     jobs_by: JobsBy,
+    user_api_key: str,
     api_key: security_router.APIKey = security_router.Depends(
         security_router.get_api_key
     ),
     db: Session = Depends(get_db),
 ):
     try:
+        validate_user_api_key(user_api_key)
+        
         cfg = ConfigService(db)
-        data = cfg.select_token(api_key)
+        data = cfg.select_token(user_api_key)
         elog = ElogsService(db)
         user_data = elog.get_jobs_by(
             data["token"],
@@ -181,7 +202,9 @@ async def get_jobs_by(
     response_model=Result,
     operation_id="get_jobs",
 )
+@require_admin_api_key
 async def get_jobs(
+    user_api_key: str,
     site_id: int,
     job_id: int | None = None,
     page: int = 1,
@@ -191,8 +214,10 @@ async def get_jobs(
     db: Session = Depends(get_db),
 ):
     try:
+        validate_user_api_key(user_api_key)
+        
         cfg = ConfigService(db)
-        data = cfg.select_token(api_key)
+        data = cfg.select_token(user_api_key)
         elog = ElogsService(db)
         user_data = elog.get_jobs(data["token"], data["url"], site_id, job_id, page)
         return {"status": "OK", "message": "Jobs found.", "data": [user_data]}
@@ -211,7 +236,9 @@ async def get_jobs(
     response_model=Result,
     operation_id="acknowledge_job",
 )
+@require_admin_api_key
 async def acknowledge_job(
+    user_api_key: str,
     site_id: int,
     job_id: int,
     job_data: JobData,
@@ -221,8 +248,10 @@ async def acknowledge_job(
     db: Session = Depends(get_db),
 ):
     try:
+        validate_user_api_key(user_api_key)
+        
         cfg = ConfigService(db)
-        data = cfg.select_token(api_key)
+        data = cfg.select_token(user_api_key)
         elog = ElogsService(db)
         user_data = elog.acknowledge_job(
             data["token"], data["url"], site_id, job_id, job_data.model_dump_json()
@@ -243,7 +272,9 @@ async def acknowledge_job(
     response_model=Result,
     operation_id="commence_job",
 )
+@require_admin_api_key
 async def commence_job(
+    user_api_key: str,
     site_id: int,
     job_id: int,
     job_data: JobData,
@@ -253,8 +284,10 @@ async def commence_job(
     db: Session = Depends(get_db),
 ):
     try:
+        validate_user_api_key(user_api_key)
+        
         cfg = ConfigService(db)
-        data = cfg.select_token(api_key)
+        data = cfg.select_token(user_api_key)
         elog = ElogsService(db)
         user_data = elog.commence_job(
             data["token"], data["url"], site_id, job_id, job_data.model_dump_json()
@@ -275,7 +308,9 @@ async def commence_job(
     response_model=Result,
     operation_id="complete_job",
 )
+@require_admin_api_key
 async def complete_job(
+    user_api_key: str,
     site_id: int,
     job_id: int,
     job_data: JobCompletion,
@@ -285,8 +320,10 @@ async def complete_job(
     db: Session = Depends(get_db),
 ):
     try:
+        validate_user_api_key(user_api_key)
+        
         cfg = ConfigService(db)
-        data = cfg.select_token(api_key)
+        data = cfg.select_token(user_api_key)
         elog = ElogsService(db)
         user_data = elog.complete_job(
             data["token"],
@@ -310,7 +347,9 @@ async def complete_job(
     response_model=Result,
     operation_id="complete_paperwork_job",
 )
+@require_admin_api_key
 async def complete_paperwork_job(
+    user_api_key: str,
     site_id: int,
     job_id: int,
     job_data: JobCompletion,
@@ -320,8 +359,10 @@ async def complete_paperwork_job(
     db: Session = Depends(get_db),
 ):
     try:
+        validate_user_api_key(user_api_key)
+        
         cfg = ConfigService(db)
-        data = cfg.select_token(api_key)
+        data = cfg.select_token(user_api_key)
         elog = ElogsService(db)
         user_data = elog.complete_paperwork(
             data["token"],
@@ -345,7 +386,9 @@ async def complete_paperwork_job(
     response_model=Result,
     operation_id="create_job",
 )
+@require_admin_api_key
 async def create_job(
+    user_api_key: str,
     site_id: int,
     job_data: CreateJobRequest,
     api_key: security_router.APIKey = security_router.Depends(
@@ -354,8 +397,10 @@ async def create_job(
     db: Session = Depends(get_db),
 ):
     try:
+        validate_user_api_key(user_api_key)
+        
         cfg = ConfigService(db)
-        data = cfg.select_token(api_key)
+        data = cfg.select_token(user_api_key)
         elog = ElogsService(db)
         # Preserve the _links structure with underscore during serialization
         json_data = job_data.model_dump(by_alias=True)
@@ -376,7 +421,9 @@ async def create_job(
     response_model=Result,
     operation_id="approve_job",
 )
+@require_admin_api_key
 async def approve_job(
+    user_api_key: str,
     site_id: int,
     job_id: int,
     job_data: JobData,
@@ -386,8 +433,10 @@ async def approve_job(
     db: Session = Depends(get_db),
 ):
     try:
+        validate_user_api_key(user_api_key)
+        
         cfg = ConfigService(db)
-        data = cfg.select_token(api_key)
+        data = cfg.select_token(user_api_key)
         elog = ElogsService(db)
         user_data = elog.approve_job(
             data["token"], data["url"], site_id, job_id, "accept", job_data.model_dump_json()
@@ -408,7 +457,9 @@ async def approve_job(
     response_model=Result,
     operation_id="reject_job",
 )
+@require_admin_api_key
 async def reject_job(
+    user_api_key: str,
     site_id: int,
     job_id: int,
     job_data: JobData,
@@ -418,8 +469,10 @@ async def reject_job(
     db: Session = Depends(get_db),
 ):
     try:
+        validate_user_api_key(user_api_key)
+        
         cfg = ConfigService(db)
-        data = cfg.select_token(api_key)
+        data = cfg.select_token(user_api_key)
         elog = ElogsService(db)
         user_data = elog.approve_job(
             data["token"], data["url"], site_id, job_id, "reject", job_data
@@ -439,7 +492,9 @@ async def reject_job(
     response_model=Result,
     operation_id="update_job",
 )
+@require_admin_api_key
 async def send_job_message(
+    user_api_key: str,
     site_id: int,
     job_id: int,
     message_data: MessageData,
@@ -449,8 +504,10 @@ async def send_job_message(
     db: Session = Depends(get_db),
 ):
     try:
+        validate_user_api_key(user_api_key)
+        
         cfg = ConfigService(db)
-        data = cfg.select_token(api_key)
+        data = cfg.select_token(user_api_key)
         elog = ElogsService(db)
         user_data = elog.send_message(
             data["token"], data["url"], site_id, job_id, message_data.model_dump_json()
@@ -470,7 +527,9 @@ async def send_job_message(
     response_model=Result,
     operation_id="add_job_file",
 )
+@require_admin_api_key
 async def add_job_file(
+    user_api_key: str,
     site_id: int,
     job_id: int,
     file_data: JobFileData,
@@ -480,8 +539,10 @@ async def add_job_file(
     db: Session = Depends(get_db),
 ):
     try:
+        validate_user_api_key(user_api_key)
+        
         cfg = ConfigService(db)
-        data = cfg.select_token(api_key)
+        data = cfg.select_token(user_api_key)
         elog = ElogsService(db)
         json_data = file_data.model_dump(by_alias=True)
         user_data = elog.add_job_file(
@@ -502,7 +563,9 @@ async def add_job_file(
     response_model=Result,
     operation_id="request_job_extension",
 )
+@require_admin_api_key
 async def request_job_extension(
+    user_api_key: str,
     site_id: int,
     job_id: int,
     job_data: JobData,
@@ -512,8 +575,10 @@ async def request_job_extension(
     db: Session = Depends(get_db),
 ):
     try:
+        validate_user_api_key(user_api_key)
+        
         cfg = ConfigService(db)
-        data = cfg.select_token(api_key)
+        data = cfg.select_token(user_api_key)
         elog = ElogsService(db)
         user_data = elog.request_job_extension(
             data["token"], data["url"], site_id, job_id, job_data
@@ -534,7 +599,9 @@ async def request_job_extension(
     response_model=Result,
     operation_id="accept_job_extension",
 )
+@require_admin_api_key
 async def accept_job_extension(
+    user_api_key: str,
     site_id: int,
     job_id: int,
     status: str,
@@ -545,8 +612,10 @@ async def accept_job_extension(
     db: Session = Depends(get_db),
 ):
     try:
+        validate_user_api_key(user_api_key)
+        
         cfg = ConfigService(db)
-        data = cfg.select_token(api_key)
+        data = cfg.select_token(user_api_key)
         elog = ElogsService(db)
         user_data = elog.accept_job_extension(
             data["token"], data["url"], site_id, job_id, status, job_data
@@ -571,7 +640,9 @@ async def accept_job_extension(
     response_model=Result,
     operation_id="get_file_data",
 )
+@require_admin_api_key
 async def get_file_data(
+    user_api_key: str,
     file_data: dict,
     api_key: security_router.APIKey = security_router.Depends(
         security_router.get_api_key
@@ -579,8 +650,10 @@ async def get_file_data(
     db: Session = Depends(get_db),
 ):
     try:
+        validate_user_api_key(user_api_key)
+        
         cfg = ConfigService(db)
-        data = cfg.select_token(api_key)
+        data = cfg.select_token(user_api_key)
         elog = ElogsService(db)
         user_data = elog.get_file_data(data["token"], data["url"], file_data)
         return {"status": "OK", "message": "File data found.", "data": [user_data]}
@@ -599,7 +672,9 @@ async def get_file_data(
     response_model=Result,
     operation_id="upload_file",
 )
+@require_admin_api_key
 async def upload_file(
+    user_api_key: str,
     key: str = Form(...),
     bucket: str = Form(...),
     google_access_id: str = Form(...),
@@ -614,11 +689,13 @@ async def upload_file(
     db: Session = Depends(get_db),
 ):
     try:
+        validate_user_api_key(user_api_key)
+        
         # Read the file content once
         file_content = await file_data.read()
 
         cfg = ConfigService(db)
-        data = cfg.select_token(api_key)
+        data = cfg.select_token(user_api_key)
         elog = ElogsService(db)
         google_bucket_data = GoogleBucketData(
             key=key,

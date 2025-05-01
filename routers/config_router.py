@@ -7,8 +7,8 @@ from sqlalchemy.orm import Session
 from starlette.requests import Request
 
 from entities.base import Result, Config, ConfigRefresh, ConfigCreate
-from libs.config import GLOBAL_API_KEY, JWT_SECRET_KEY, app_cache
-from libs.utils import encode
+from libs.config import JWT_SECRET_KEY, app_cache
+from libs.utils import require_admin_api_key
 from routers import security_router
 from services.config import ConfigService
 from services.database import get_db
@@ -23,6 +23,7 @@ router = APIRouter()
     response_model=Result,
     operation_id="get_config",
 )
+@require_admin_api_key
 async def get_config(
         api_key: security_router.APIKey = security_router.Depends(
             security_router.get_api_key
@@ -30,9 +31,6 @@ async def get_config(
         db: Session = Depends(get_db),
 ):
     try:
-        if encode(api_key) != GLOBAL_API_KEY:
-            raise Exception("Operation Not allowed.")
-
         cfg = ConfigService(db)
         data = cfg.list_config()
     except Exception as exc:
@@ -51,6 +49,7 @@ async def get_config(
     response_model=Result,
     operation_id="get_token",
 )
+@require_admin_api_key
 async def get_token(
         user_id: int,
         api_key: security_router.APIKey = security_router.Depends(
@@ -59,9 +58,6 @@ async def get_token(
         db: Session = Depends(get_db),
 ):
     try:
-        if encode(api_key) != GLOBAL_API_KEY:
-            raise Exception("Operation Not allowed.")
-
         cfg = ConfigService(db)
         data = cfg.select_token_by_user_id(user_id)
     except Exception as exc:
@@ -85,6 +81,7 @@ async def get_token(
     response_model=Result,
     operation_id="delete_config",
 )
+@require_admin_api_key
 async def delete_config(
         id: int,
         api_key: security_router.APIKey = security_router.Depends(
@@ -93,11 +90,8 @@ async def delete_config(
         db: Session = Depends(get_db),
 ):
     try:
-        if encode(api_key) != GLOBAL_API_KEY:
-            raise Exception("Operation Not allowed.")
-
         cfg = ConfigService(db)
-        data = cfg.delete_config(id)
+        cfg.delete_config(id)
 
     except Exception as exc:
         print(traceback.format_exc())
@@ -116,6 +110,7 @@ async def delete_config(
     response_model=Result,
     operation_id="add_config",
 )
+@require_admin_api_key
 async def add_config(
         request: Request,
         item: ConfigCreate,
@@ -125,9 +120,6 @@ async def add_config(
         db: Session = Depends(get_db),
 ):
     try:
-        if encode(api_key) != GLOBAL_API_KEY:
-            raise Exception("Operation Not allowed.")
-
         # Trim leading and trailing spaces, then remove trailing slash from URL if present
         if item.url:
             item.url = item.url.strip()
@@ -192,6 +184,7 @@ async def add_config(
     response_model=Result,
     operation_id="refresh_config",
 )
+@require_admin_api_key
 def refresh_credential(
         user_id: int,
         item: ConfigRefresh,
@@ -205,9 +198,6 @@ def refresh_credential(
     Provide the user_id, password and api_key in the request body for validation
     """
     try:
-        if encode(api_key) != GLOBAL_API_KEY:
-             raise Exception("Operation Not allowed.")
-
         # Validate the API key exists in the config table
         cfg = ConfigService(db)
         result = cfg.exist_config_by_user_id(user_id)
