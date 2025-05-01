@@ -185,7 +185,7 @@ async def add_config(
     operation_id="refresh_config",
 )
 @require_admin_api_key
-def refresh_credential(
+async def refresh_credential(
         user_id: int,
         item: ConfigRefresh,
         api_key: security_router.APIKey = security_router.Depends(
