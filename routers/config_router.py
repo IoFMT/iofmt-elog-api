@@ -41,6 +41,48 @@ async def get_config(
         }
     return {"status": "OK", "message": "Configurations listed.", "data": data}
 
+@router.get(
+    "/config/{user_id}",
+    tags=["Configuration"],
+    status_code=status.HTTP_200_OK,
+    response_model=Result,
+    operation_id="get_config_by_id",
+)
+@require_admin_api_key
+async def get_config_by_id(
+        user_id: int,
+        api_key: security_router.APIKey = security_router.Depends(
+            security_router.get_api_key
+        ),
+        db: Session = Depends(get_db),
+):
+    try:
+        cfg = ConfigService(db)
+
+        # Check if config exists first
+        if not cfg.exist_config_by_user_id(user_id):
+            return {
+                "status": "Error",
+                "message": "Configuration not found",
+                "data": [{"msg": f"No configuration found for user_id: {user_id}"}],
+            }
+
+        # Get the config data
+        data = cfg.select_config_by_user_id(user_id)
+
+    except Exception as exc:
+        print(traceback.format_exc())
+        return {
+            "status": "Error",
+            "message": "Error Getting Config",
+            "data": [{"msg": str(exc)}],
+        }
+
+    return {
+        "status": "OK",
+        "message": "Configuration found.",
+        "data": [data]
+    }
 
 @router.get(
     "/config/token/{user_id}",

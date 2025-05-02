@@ -55,6 +55,42 @@ stages:
           first_user_name: data[0].user_name
           first_url: data[0].url
 
+  # 2a. GET /config/{user_id} - Get configuration by ID (positive test)
+  - name: Get configuration by user ID
+    request:
+      url: "{host}/config/{first_config_id}"
+      method: GET
+      verify: false
+      headers:
+        X-Access-Token: "{admin_api_key}"
+    response:
+      status_code: 200
+      json:
+        status: OK
+        message: Configuration found.
+        data:
+          - user_id: !int "{first_config_id}"
+            api_key: !anystr
+            user_name: !anystr
+            account_number: !anyint
+            url: !anystr
+
+  # 2b. GET /config/{user_id} - Get configuration by ID (negative test - non-existent user)
+  - name: Try to get configuration for non-existent user (should fail)
+    request:
+      url: "{host}/config/9999"
+      method: GET
+      verify: false
+      headers:
+        X-Access-Token: "{admin_api_key}"
+    response:
+      status_code: 200
+      json:
+        status: Error
+        message: Configuration not found
+        data:
+          - msg: "No configuration found for user_id: 9999"
+
   # 3. GET /config/token/{user_id} - Get token for a user
   - name: Get token for user
     request:
