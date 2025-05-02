@@ -42,7 +42,7 @@ async def get_config(
     return {"status": "OK", "message": "Configurations listed.", "data": data}
 
 @router.get(
-    "/config/{user_id}",
+    "/config/id/{user_id}",
     tags=["Configuration"],
     status_code=status.HTTP_200_OK,
     response_model=Result,

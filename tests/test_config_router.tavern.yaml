@@ -55,10 +55,10 @@ stages:
           first_user_name: data[0].user_name
           first_url: data[0].url
 
-  # 2a. GET /config/{user_id} - Get configuration by ID (positive test)
+  # 2a. GET /config/id/{user_id} - Get configuration by ID (positive test)
   - name: Get configuration by user ID
     request:
-      url: "{host}/config/{first_config_id}"
+      url: "{host}/config/id/{first_config_id}"
       method: GET
       verify: false
       headers:
@@ -75,10 +75,10 @@ stages:
             account_number: !anyint
             url: !anystr
 
-  # 2b. GET /config/{user_id} - Get configuration by ID (negative test - non-existent user)
+  # 2b. GET /config/id/{user_id} - Get configuration by ID (negative test - non-existent user)
   - name: Try to get configuration for non-existent user (should fail)
     request:
-      url: "{host}/config/9999"
+      url: "{host}/config/id/9999"
       method: GET
       verify: false
       headers:
