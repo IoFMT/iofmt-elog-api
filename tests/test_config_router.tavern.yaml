@@ -1,0 +1,154 @@
+---
+test_name: Config Router API Tests
+
+includes:
+  - !include common.yaml
+
+stages:
+  # 1. POST /config - Create a new configuration
+  - name: Create a new configuration
+    request:
+      url: "{host}/config"
+      method: POST
+      verify: false
+      headers:
+        X-Access-Token: "{admin_api_key}"
+        Content-Type: application/json
+      json:
+        account_number: 12345
+        user_name: "{random_username}"
+        url: "https://example.com/api"
+        user_pwd: "test_password"
+    response:
+      status_code: 200
+      json:
+        status: OK
+        message: Configuration added.
+        data:
+          - api_key: !anystr
+            account_number: 12345
+            user_id: !anyint
+            user_name: "{random_username}"
+            url: "https://example.com/api"
+      save:
+        json:
+          new_user_id: data[0].user_id
+
+  # 2. GET /config - List all configurations
+  - name: Get all configurations
+    request:
+      url: "{host}/config"
+      method: GET
+      verify: false
+      headers:
+        X-Access-Token: "{admin_api_key}"
+    response:
+      status_code: 200
+      json:
+        status: OK
+        message: Configurations listed.
+        data: !anything
+      save:
+        json:
+          first_config_id: data[0].user_id
+          first_account_number: data[0].account_number
+          first_user_name: data[0].user_name
+          first_url: data[0].url
+
+  # 3. GET /config/token/{user_id} - Get token for a user
+  - name: Get token for user
+    request:
+      url: "{host}/config/token/{new_user_id}"
+      method: GET
+      verify: false
+      headers:
+        X-Access-Token: "{admin_api_key}"
+    response:
+      status_code: 200
+      json:
+        status: !anystr
+        message: !anystr
+        data: !anything
+
+  # 4. POST /config/{user_id}/refresh-credential - Refresh user credentials
+  - name: Refresh user credentials
+    request:
+      url: "{host}/config/{new_user_id}/refresh-credential"
+      method: POST
+      verify: false
+      headers:
+        X-Access-Token: "{admin_api_key}"
+        Content-Type: application/json
+      json:
+        user_pwd: "updated_password"
+    response:
+      status_code: 200
+      json:
+        status: OK
+        message: Configuration refreshed.
+        data: []
+
+  # 5. DELETE /config/{id} - Delete a configuration
+  - name: Delete the created configuration
+    request:
+      url: "{host}/config/{new_user_id}"
+      method: DELETE
+      verify: false
+      headers:
+        X-Access-Token: "{admin_api_key}"
+    response:
+      status_code: 200
+      json:
+        status: OK
+        message: Configuration deleted.
+        data:
+          - user_id: !int "{new_user_id}"
+
+  # 6. Negative Test: Try to get token for deleted user
+  - name: Try to get token for deleted user (should fail)
+    request:
+      url: "{host}/config/token/{new_user_id}"
+      method: GET
+      verify: false
+      headers:
+        X-Access-Token: "{admin_api_key}"
+    response:
+      status_code: 200
+      json:
+        status: Error
+        message: Error getting token
+        data: !anything
+
+  # 7. Negative Test: Try to create a duplicate configuration
+  - name: Create a duplicate configuration (should fail)
+    request:
+      url: "{host}/config"
+      method: POST
+      verify: false
+      headers:
+        X-Access-Token: "{admin_api_key}"
+        Content-Type: application/json
+      json:
+        account_number: !int "{first_account_number}"
+        user_name: "{first_user_name}"
+        url: "{first_url}"  # Using the same URL as in common.yaml
+        user_pwd: "test_password"
+
+  # 8. Negative Test: Try to refresh credentials for non-existent user
+  - name: Try to refresh credentials for non-existent user (should fail)
+    request:
+      url: "{host}/config/9999/refresh-credential"
+      method: POST
+      verify: false
+      headers:
+        X-Access-Token: "{admin_api_key}"
+        Content-Type: application/json
+      json:
+        user_pwd: "some_password"
+    response:
+      status_code: 200
+      json:
+        status: Error
+        message: Error refreshing Configuration
+        data:
+          - msg: !anystr

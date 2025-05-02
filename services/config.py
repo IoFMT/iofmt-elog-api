@@ -125,7 +125,7 @@ class ConfigService:
         result = self.db.execute(stmt).fetchone()
 
         if not result:
-            return None
+            raise Exception("Token is null or not available")
 
         # Handle NULL other_urls by defaulting to empty list/dict
         other_urls = result[3]
