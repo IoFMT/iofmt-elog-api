@@ -246,25 +246,37 @@
                                 </div>
                             </div>
                             <div class="field">
-                                <label class="label">Elogs URL</label>
+                                <label class="label">User ID</label>
                                 <div class="control">
-                                    <input class="input" type="text" placeholder="https://elogs.example.com" x-model="newConfig.url">
+                                    <input class="input" type="text" placeholder="User ID"
+                                           x-model.number="newConfig.user_id"
+                                           @keypress="isNumber($event)">
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="field is-horizontal">
-                        <div class="field-body">
-                            <div class="field">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="field is-horizontal">
+                                                        <div class="field-body">
+                                                            <div class="field">
                                 <label class="label">User Name</label>
                                 <div class="control">
                                     <input class="input" type="text" placeholder="User Name" x-model="newConfig.user_name">
                                 </div>
-                            </div>
-                            <div class="field">
+                                                            </div>
+                                                            <div class="field">
                                 <label class="label">Password</label>
                                 <div class="control">
                                     <input class="input" type="password" placeholder="Password" x-model="newConfig.user_pwd">
+                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="field is-horizontal">
+                                                        <div class="field-body">
+                                                            <div class="field">
+                                <label class="label">Elogs URL</label>
+                                <div class="control">
+                                    <input class="input" type="text" placeholder="https://elogs.example.com" x-model="newConfig.url">
                                 </div>
                             </div>
                         </div>
@@ -371,9 +383,10 @@
             loading: true,
             newConfig: {
                 account_number: '',
-                url: '',
+                user_id: '',
                 user_name: '',
                 user_pwd: '',
+                url: '',
             },
             notifications: [],
 
@@ -485,6 +498,11 @@
                     this.showNotification('Please fill in all required fields', 'error');
                     this.loading = false;
                     return;
+                }
+                
+                // If user_id is empty string, set it to null so the API creates one automatically
+                if (this.newConfig.user_id === '') {
+                    this.newConfig.user_id = null;
                 }
 
                 // Submit the config data to the API
