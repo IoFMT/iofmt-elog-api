@@ -207,6 +207,7 @@ async def add_config(
         if "config_url_username_unique" in error_message:
             return {
                 "status": "Error",
+                "errorCode": "CONFIG_DUPLICATE_URL_USERNAME_ERROR",
                 "message": "Duplicate configuration",
                 "data": [{
                     "msg": f"A configuration for username '{item.user_name}' with URL '{item.url}' already exists. Each combination of username and URL must be unique."}],
@@ -214,6 +215,7 @@ async def add_config(
 
         return {
             "status": "Error",
+            "errorCode": "CONFIG_ADD_GENERIC_ERROR",
             "message": "Error adding Configuration",
             "data": [{"msg": error_message}],
         }
