@@ -21,6 +21,11 @@ class ConfigRefresh(BaseModel):
     )
 
 class ConfigCreate(BaseModel):
+    user_id: Optional[int] = Field(
+        None,
+        title="User ID",
+        description="Unique identifier for the user"
+    )
     account_number: int = Field(
         title="Account Number",
         description="Numeric unique identifier for client organization"
@@ -49,6 +54,11 @@ class ConfigCreate(BaseModel):
             raise ValueError("Invalid URL format")
 
 class Config(ConfigRefresh):
+    user_id: Optional[int] = Field(
+        None,
+        title="User ID",
+        description="Unique identifier for the user"
+    )
     api_key: Optional[str] = Field(
         None,
         title="API Key",

@@ -15,6 +15,7 @@ stages:
         X-Access-Token: "{admin_api_key}"
         Content-Type: application/json
       json:
+        user_id: !int "{random_id}"
         account_number: 12345
         user_name: "{random_username}"
         url: "https://example.com/api"

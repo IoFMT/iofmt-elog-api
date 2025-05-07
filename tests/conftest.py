@@ -18,3 +18,8 @@ def random_username():
     length = 8
     letters = string.ascii_lowercase
     return ''.join(random.choice(letters) for _ in range(length))
+
+
+@pytest.fixture(scope="session", autouse=True)
+def random_id():
+    return random.randint(1, 99999)

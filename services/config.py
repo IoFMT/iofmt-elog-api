@@ -18,7 +18,7 @@ class ConfigService:
         # Insert the config
         stmt = text(config.CACHE_SQL_INSERT_CONFIG)
         stmt = stmt.bindparams(
-            p1=data.api_key, p2=data.account_number, p3=data.user_name,
+            p0=data.user_id, p1=data.api_key, p2=data.account_number, p3=data.user_name,
             p4=data.url, p5=data.created_at, p6=data.created_by
         )
         self.db.execute(stmt)

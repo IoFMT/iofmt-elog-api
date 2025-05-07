@@ -13,7 +13,7 @@ Additionally, the script sets the owner of the 'config' table to 'iofmtadm' and 
 CREATE SCHEMA elogapi;
 
 CREATE TABLE IF NOT EXISTS elogapi.config (
-    user_id SERIAL PRIMARY KEY,
+    user_id INTEGER PRIMARY KEY,
     api_key TEXT UNIQUE NOT NULL,
     user_name VARCHAR(100) NOT NULL,
     token TEXT NULL,

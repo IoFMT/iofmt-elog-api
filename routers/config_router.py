@@ -170,6 +170,7 @@ async def add_config(
 
         # Convert ConfigCreate to Config model
         config_obj = Config(
+            user_id=item.user_id,
             account_number=item.account_number,
             user_name=item.user_name,
             url=item.url,

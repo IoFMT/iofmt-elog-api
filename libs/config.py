@@ -52,8 +52,9 @@ if "CACHE_DB_PWD" in os.environ:
 CACHE_DB = f"postgresql://{CACHE_DB_USER}:{CACHE_DB_PWD}@{CACHE_DB_HOST}/postgres"
 
 CACHE_SQL_INSERT_CONFIG = """INSERT INTO elogapi.config
-                          (api_key, account_number, user_name, url, created_at, created_by)
-                          VALUES (:p1, :p2, :p3, :p4, :p5, :p6)"""
+                          (user_id, api_key, account_number, user_name, url, created_at, created_by)
+                          VALUES (:p0, :p1, :p2, :p3, :p4, :p5, :p6)"""
+
 
 CACHE_SQL_DELETE_CONFIG = """DELETE FROM elogapi.config WHERE user_id = :p1"""
 
